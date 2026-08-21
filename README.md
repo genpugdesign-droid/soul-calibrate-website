@@ -1,6 +1,6 @@
 # soul-calibrate-website
 
-Marketing site for Soul Calibrate. Static HTML/CSS/JS, no build step.
+Marketing site for MAGI. Static HTML/CSS/JS, no build step.
 
 ## Structure
 
