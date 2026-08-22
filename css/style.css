@@ -268,14 +268,60 @@ a { color: inherit; }
   background: var(--panel);
   border: 1px solid var(--border-strong);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  clip-path: inset(0 0 100% 0);
+  transition: border-color 0.3s ease;
+}
+
+/* double outline: outer .deck-card border + this inset frame */
+.deck-card::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--border);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.deck-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 229, 255, 0.16) 0px,
+    rgba(0, 229, 255, 0.16) 2px,
+    transparent 2px,
+    transparent 5px
+  );
+  mix-blend-mode: screen;
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s ease;
+  pointer-events: none;
+  z-index: 3;
 }
 
 .deck-card.in-view {
-  opacity: 1;
-  transform: translateY(0);
+  animation: glitch-open 0.9s ease forwards;
+}
+
+.deck-card.in-view::after {
+  animation: glitch-scan 0.9s ease forwards;
+}
+
+@keyframes glitch-open {
+  0%   { clip-path: inset(0 0 100% 0); transform: translateX(0); filter: none; }
+  15%  { clip-path: inset(0 0 82% 0); transform: translateX(-6px); filter: hue-rotate(12deg); }
+  30%  { clip-path: inset(0 0 64% 0); transform: translateX(5px); filter: none; }
+  45%  { clip-path: inset(0 0 46% 0); transform: translateX(-4px); filter: hue-rotate(-10deg); }
+  60%  { clip-path: inset(0 0 28% 0); transform: translateX(3px); filter: none; }
+  75%  { clip-path: inset(0 0 14% 0); transform: translateX(-2px); }
+  90%  { clip-path: inset(0 0 3% 0); transform: translateX(0); }
+  100% { clip-path: inset(0 0 0% 0); transform: translateX(0); filter: none; }
+}
+
+@keyframes glitch-scan {
+  0%   { opacity: 0.9; }
+  60%  { opacity: 0.35; }
+  100% { opacity: 0; }
 }
 
 .deck-card:hover { border-color: var(--blue-dim); }
@@ -354,5 +400,5 @@ a { color: inherit; }
 
   .card-slot { min-height: auto; padding: 40px 6vw; }
 
-  .deck-card { position: relative; top: 0; opacity: 1; transform: none; }
+  .deck-card { position: relative; top: 0; clip-path: none; animation: none; }
 }
