@@ -154,40 +154,6 @@ a { color: inherit; }
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-.glitch-text {
-  position: relative;
-  display: inline-block;
-  color: var(--text);
-}
-.glitch-text::before,
-.glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  background: var(--bg);
-}
-.glitch-text::before {
-  color: var(--blue);
-  clip-path: inset(0 0 55% 0);
-  animation: glitch-shift 3.6s infinite linear alternate-reverse;
-}
-.glitch-text::after {
-  color: var(--red);
-  clip-path: inset(55% 0 0 0);
-  animation: glitch-shift 2.8s infinite linear alternate-reverse;
-}
-@keyframes glitch-shift {
-  0%   { transform: translate(0, 0); }
-  20%  { transform: translate(-2px, 1px); }
-  40%  { transform: translate(2px, -1px); }
-  60%  { transform: translate(-1px, 0); }
-  80%  { transform: translate(1px, 1px); }
-  100% { transform: translate(0, 0); }
-}
-
 .cta {
   display: inline-block;
   padding: 12px 22px;
