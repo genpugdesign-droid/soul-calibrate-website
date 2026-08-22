@@ -126,6 +126,23 @@ a { color: inherit; }
   text-shadow: 0 0 22px var(--blue-dim);
 }
 
+.forged-by {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: var(--text-dim);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.sz-logo-placeholder {
+  padding: 3px 10px;
+  border: 1px dashed var(--border-strong);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
 .hero-sub {
   max-width: 60ch;
   color: var(--text-dim);
