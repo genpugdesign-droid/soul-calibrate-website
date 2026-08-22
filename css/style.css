@@ -135,12 +135,10 @@ a { color: inherit; }
   font-size: 13px;
   letter-spacing: 0.04em;
 }
-.sz-logo-placeholder {
-  padding: 3px 10px;
-  border: 1px dashed var(--border-strong);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--text-dim);
+.sz-logo {
+  height: 22px;
+  width: auto;
+  display: block;
 }
 
 .hero-sub {
