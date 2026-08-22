@@ -198,6 +198,7 @@ a { color: inherit; }
   background: none;
   box-shadow: none;
   z-index: 2;
+  mix-blend-mode: screen;
 }
 
 .video-placeholder {
