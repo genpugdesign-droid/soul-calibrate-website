@@ -45,16 +45,17 @@ window.addEventListener('resize', sizeAsciiGrid, { passive: true });
 setInterval(renderAsciiFrame, 120);
 
 // Scroll-scrubbed video: maps scroll progress through .deck-section to
-// video.currentTime. No-ops until a real <source> is added to #bg-video.
+// video.currentTime. The ascii-static layer stays running behind it — only
+// the "NO SIGNAL" text is dismissed once real footage is ready.
 const deckSection = document.getElementById('deck');
 const video = document.getElementById('bg-video');
-const placeholder = document.getElementById('video-placeholder');
+const signalBox = document.querySelector('.signal-box');
 
 let videoReady = false;
 video.addEventListener('loadedmetadata', () => {
   if (video.duration && isFinite(video.duration)) {
     videoReady = true;
-    placeholder.style.display = 'none';
+    if (signalBox) signalBox.style.display = 'none';
   }
 });
 
