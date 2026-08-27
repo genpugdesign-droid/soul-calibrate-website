@@ -460,16 +460,17 @@ function keyedCanvas(source, canvas, opts) {
   }
 
   function paint() {
-    if (!key()) return;
+    if (!key()) return false;
     const cw = canvas.width;
     const ch = canvas.height;
-    if (!cw || !ch) return;
+    if (!cw || !ch) return false;
     ctx.clearRect(0, 0, cw, ch);
     const scale = Math.min(cw / work.width, ch / work.height);
     const w = work.width * scale;
     const h = work.height * scale;
     ctx.globalAlpha = settings.alpha;
     ctx.drawImage(work, (cw - w) / 2, (ch - h) / 2, w, h);
+    return true;
   }
 
   function resize(width, height) {
@@ -501,14 +502,21 @@ function keyedCanvas(source, canvas, opts) {
 
 // The deck clip: repainted whenever a scrub lands on a new frame.
 (function deckBackdrop() {
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
+  // Every device now, not just touch. Under `screen` the ascii field showed
+  // through the clip's dark areas, so the throw read as being UNDER the static.
+  // Keyed pixels sit on top of it instead, and the ground stays transparent so
+  // the field still fills everything around the figures.
   const wrap = document.getElementById('video-bg-wrap');
   const canvas = document.getElementById('bg-canvas');
   const source = document.getElementById('bg-video');
   if (!wrap || !canvas || !source) return;
 
-  const renderer = keyedCanvas(source, canvas, { alpha: 0.55 });
+  // On a phone the clip is a backdrop behind the cards and stays quiet. On
+  // desktop it is the thing you are looking at, and `screen` used to ADD light
+  // to the ascii beneath it — keying at 0.55 reads far dimmer than that did, so
+  // the pointer path keeps it at full strength.
+  const isTouch = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const renderer = keyedCanvas(source, canvas, { alpha: isTouch ? 0.55 : 1 });
   if (!renderer) return;
   wrap.classList.add('is-canvas');
 
@@ -518,16 +526,26 @@ function keyedCanvas(source, canvas, opts) {
   };
   source.addEventListener('seeked', renderer.paint);
   source.addEventListener('loadeddata', fit);
+  source.addEventListener('canplay', fit);
   window.addEventListener('resize', fit, { passive: true });
   fit();
+
+  // A still frame only repaints when something asks it to, so if every trigger
+  // fires before these listeners attach — a cached video is ready immediately —
+  // the canvas would simply stay empty. Retry until one lands.
+  let tries = 0;
+  (function settle() {
+    if (renderer.paint() || tries++ > 12) return;
+    setTimeout(settle, 250);
+  })();
 })();
 
 // The hero lockup: a looping animation, so it repaints continuously. Its source
 // is a dark mark on light grey, the inverse of this page, so it is inverted
 // before the key — the same thing the CSS filter does for the desktop path.
 (function heroMark() {
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
+  // Also every device: one path is easier to reason about than two, and it
+  // removes the last dependency on a blend mode that engines disagree about.
   const stack = document.querySelector('.hero-stack');
   const source = document.getElementById('hero-mark');
   const canvas = document.getElementById('hero-mark-canvas');
