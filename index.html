@@ -71,6 +71,9 @@
              preload="auto" aria-hidden="true" width="2880" height="1080">
         <source src="assets/video/magi-liquid-metal.mp4" type="video/mp4">
       </video>
+      <!-- Touch only: the frames are keyed and drawn here instead, because the
+           CSS knockout depends on mix-blend-mode. See keyedCanvas() in main.js. -->
+      <canvas class="hero-mark-canvas" id="hero-mark-canvas" aria-hidden="true"></canvas>
     </h1>
 
       <!-- Directly under the lockup and centred on it, so the claim reads as

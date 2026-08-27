@@ -1843,17 +1843,12 @@ code,
    black, and this page's own ground is #030304 — so dropping the blend and
    leaning on contrast alone costs almost nothing visually and actually renders. */
 @media (hover: none) {
-  .bg-video {
-    mix-blend-mode: normal;
-    background: transparent;
-  }
-
-  .hero-mark {
-    mix-blend-mode: normal;
-    /* harder crush, since black is now hiding the ground rather than the blend */
-    filter: invert(1) hue-rotate(180deg) contrast(2.4) brightness(1.12) saturate(1.08);
-    background: transparent;
-  }
+  /* Dropping the blend was the wrong fix: without it the keyed-out ground is
+     painted as opaque black, which is the dark rectangle that appeared around
+     both clips. The blend stays; what changes is that on touch the frames are
+     keyed in JS and drawn into a canvas, where black becomes genuinely
+     transparent rather than relying on a blend mode WebKit may ignore. */
+  .hero-stack.is-canvas .hero-mark { opacity: 0; position: absolute; }
 }
 
 /* ── touch: paint the clip through a canvas ───────────────────────────────────
@@ -1877,3 +1872,14 @@ code,
 }
 .video-bg-wrap.is-canvas .bg-canvas { display: block; }
 .video-bg-wrap.is-canvas .bg-video { opacity: 0; }
+
+.hero-mark-canvas {
+  display: none;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+/* Keyed on the class JS adds, not on a media query: a bare .hero-mark-canvas
+   rule declared later in the file would otherwise win on order and keep the
+   canvas hidden — which is exactly what happened the first time. */
+.hero-stack.is-canvas .hero-mark-canvas { display: block; }

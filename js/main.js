@@ -407,17 +407,100 @@ if (deckToggle) {
   }, { passive: true });
 })();
 
-// ---------- touch: paint the clip through a canvas ----------
-// Neither priming the decode nor dropping the blend made the throw appear on
-// phones. Compositing a video inside a fixed, blended, filtered stack is the
-// fragile part, so on touch the video stops painting and its frames are copied
-// into a canvas: ordinary pixels, no blend mode, no compositing path to fall
-// through.
+// ---------- touch: key the frames and paint them into a canvas ----------
+// Both clips are knocked out with mix-blend-mode: screen — black contributes
+// nothing. WebKit ignores that blend in several compositing situations, and
+// simply turning the blend off paints the black ground as an opaque rectangle
+// (which is exactly the dark box that appeared around both clips).
 //
-// The video element stays in the DOM at opacity 0 rather than display:none — a
-// video that is not rendered may stop decoding, and then there is no frame to
-// copy.
-(function canvasBackdrop() {
+// So on touch the frames are keyed properly instead: each pixel's alpha is set
+// from its own brightness, which makes black genuinely transparent rather than
+// asking a blend mode to hide it. That is plain pixel data, so nothing depends
+// on a compositing path.
+function keyedCanvas(source, canvas, opts) {
+  const settings = Object.assign({ invert: false, alpha: 1, animate: false, fps: 15 }, opts);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  // The keying loop runs per pixel, so it works on a small buffer and the
+  // result is scaled up. The clips are soft; the detail is not missed.
+  const FLOOR = 24;   // brightness below this is ground, not mark
+  const GAIN = 1.35;  // and what survives is lifted back to full strength
+
+  const work = document.createElement('canvas');
+  const wctx = work.getContext('2d', { willReadFrequently: true });
+  const WORK_W = 480;
+
+  function key() {
+    const vw = source.videoWidth;
+    const vh = source.videoHeight;
+    if (!vw || !vh || source.readyState < 2) return false;
+
+    const w = Math.min(WORK_W, vw);
+    const h = Math.max(1, Math.round(w * vh / vw));
+    if (work.width !== w || work.height !== h) { work.width = w; work.height = h; }
+
+    try { wctx.drawImage(source, 0, 0, w, h); } catch (e) { return false; }
+    const img = wctx.getImageData(0, 0, w, h);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      let r = d[i], g = d[i + 1], b = d[i + 2];
+      if (settings.invert) { r = 255 - r; g = 255 - g; b = 255 - b; }
+      // brightness becomes opacity: the ground falls away, the mark stays.
+      // The floor matters — an inverted grey ground lands around 18/255, which
+      // is not black but is still a visible haze once it covers a whole frame.
+      const lum = r > g ? (r > b ? r : b) : (g > b ? g : b);
+      let a = (lum - FLOOR) * GAIN;
+      if (a < 0) a = 0; else if (a > 255) a = 255;
+      d[i] = r; d[i + 1] = g; d[i + 2] = b;
+      d[i + 3] = a;
+    }
+    wctx.putImageData(img, 0, 0);
+    return true;
+  }
+
+  function paint() {
+    if (!key()) return;
+    const cw = canvas.width;
+    const ch = canvas.height;
+    if (!cw || !ch) return;
+    ctx.clearRect(0, 0, cw, ch);
+    const scale = Math.min(cw / work.width, ch / work.height);
+    const w = work.width * scale;
+    const h = work.height * scale;
+    ctx.globalAlpha = settings.alpha;
+    ctx.drawImage(work, (cw - w) / 2, (ch - h) / 2, w, h);
+  }
+
+  function resize(width, height) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.round(width * dpr);
+    const h = Math.round(height * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    paint();
+  }
+
+  if (settings.animate) {
+    // a looping mark does not need 60fps, and a per-pixel loop at 60fps on a
+    // phone is a battery decision rather than a visual one
+    let last = 0;
+    const tick = (now) => {
+      if (now - last > 1000 / settings.fps) { last = now; paint(); }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    // timeupdate is the belt to that braces: it fires from the media clock
+    // rather than the frame clock, so the mark still paints wherever rAF is
+    // throttled — a backgrounded tab, low power mode, or reduced-motion.
+    source.addEventListener('timeupdate', paint);
+    source.addEventListener('playing', paint);
+  }
+
+  return { paint, resize };
+}
+
+// The deck clip: repainted whenever a scrub lands on a new frame.
+(function deckBackdrop() {
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
   const wrap = document.getElementById('video-bg-wrap');
@@ -425,52 +508,40 @@ if (deckToggle) {
   const source = document.getElementById('bg-video');
   if (!wrap || !canvas || !source) return;
 
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  const renderer = keyedCanvas(source, canvas, { alpha: 0.55 });
+  if (!renderer) return;
   wrap.classList.add('is-canvas');
 
-  const OPACITY = 0.55;   // matches what .bg-video carried on mobile
-
-  function size() {
+  const fit = () => {
     const r = wrap.getBoundingClientRect();
-    if (!r.width || !r.height) return;
-    // cap the ratio: a 3x buffer on a full-screen backdrop costs more than it shows
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(r.width * dpr);
-    const h = Math.round(r.height * dpr);
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-    draw();
-  }
+    if (r.width && r.height) renderer.resize(r.width, r.height);
+  };
+  source.addEventListener('seeked', renderer.paint);
+  source.addEventListener('loadeddata', fit);
+  window.addEventListener('resize', fit, { passive: true });
+  fit();
+})();
 
-  function draw() {
-    const vw = source.videoWidth;
-    const vh = source.videoHeight;
-    if (!vw || !vh || source.readyState < 2) return;   // nothing decoded to copy yet
+// The hero lockup: a looping animation, so it repaints continuously. Its source
+// is a dark mark on light grey, the inverse of this page, so it is inverted
+// before the key — the same thing the CSS filter does for the desktop path.
+(function heroMark() {
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
-    const cw = canvas.width;
-    const ch = canvas.height;
-    ctx.clearRect(0, 0, cw, ch);
+  const stack = document.querySelector('.hero-stack');
+  const source = document.getElementById('hero-mark');
+  const canvas = document.getElementById('hero-mark-canvas');
+  if (!stack || !source || !canvas) return;
 
-    // `contain`, matching how the video was fitted on mobile
-    const scale = Math.min(cw / vw, ch / vh);
-    const w = vw * scale;
-    const h = vh * scale;
-    ctx.globalAlpha = OPACITY;
-    try {
-      ctx.drawImage(source, (cw - w) / 2, (ch - h) / 2, w, h);
-    } catch (e) {
-      /* frame not ready; the next seek repaints */
-    }
-  }
+  const renderer = keyedCanvas(source, canvas, { invert: true, animate: true, fps: 15 });
+  if (!renderer) return;
+  stack.classList.add('is-canvas');
 
-  // every scrub ends in a seek, so that is the repaint signal
-  source.addEventListener('seeked', draw);
-  source.addEventListener('loadeddata', size);
-  source.addEventListener('timeupdate', draw);
-  window.addEventListener('resize', size, { passive: true });
-
-  size();
+  const fit = () => {
+    const width = canvas.clientWidth || stack.clientWidth;
+    if (width) renderer.resize(width, Math.round(width * 1080 / 2880));
+  };
+  source.addEventListener('loadeddata', fit);
+  window.addEventListener('resize', fit, { passive: true });
+  fit();
 })();
