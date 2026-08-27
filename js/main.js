@@ -418,7 +418,8 @@ if (deckToggle) {
 // asking a blend mode to hide it. That is plain pixel data, so nothing depends
 // on a compositing path.
 function keyedCanvas(source, canvas, opts) {
-  const settings = Object.assign({ invert: false, alpha: 1, animate: false, fps: 15 }, opts);
+  const settings = Object.assign(
+    { invert: false, alpha: 1, animate: false, fps: 15, fit: 'contain' }, opts);
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
@@ -465,7 +466,11 @@ function keyedCanvas(source, canvas, opts) {
     const ch = canvas.height;
     if (!cw || !ch) return false;
     ctx.clearRect(0, 0, cw, ch);
-    const scale = Math.min(cw / work.width, ch / work.height);
+    // `cover` fills the panel and crops the overflow; `contain` fits the whole
+    // frame inside it — the same choice object-fit was making before the canvas.
+    const scale = settings.fit === 'cover'
+      ? Math.max(cw / work.width, ch / work.height)
+      : Math.min(cw / work.width, ch / work.height);
     const w = work.width * scale;
     const h = work.height * scale;
     ctx.globalAlpha = settings.alpha;
@@ -516,7 +521,12 @@ function keyedCanvas(source, canvas, opts) {
   // to the ascii beneath it — keying at 0.55 reads far dimmer than that did, so
   // the pointer path keeps it at full strength.
   const isTouch = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  const renderer = keyedCanvas(source, canvas, { alpha: isTouch ? 0.55 : 1 });
+  // The desktop panel is nearly square while the clip is 16:9, so `contain`
+  // left it marooned in the middle at a fraction of the width.
+  const renderer = keyedCanvas(source, canvas, {
+    alpha: isTouch ? 0.55 : 1,
+    fit: isTouch ? 'contain' : 'cover'
+  });
   if (!renderer) return;
   wrap.classList.add('is-canvas');
 
@@ -544,8 +554,12 @@ function keyedCanvas(source, canvas, opts) {
 // is a dark mark on light grey, the inverse of this page, so it is inverted
 // before the key — the same thing the CSS filter does for the desktop path.
 (function heroMark() {
-  // Also every device: one path is easier to reason about than two, and it
-  // removes the last dependency on a blend mode that engines disagree about.
+  // Touch only. On desktop the CSS filter + blend render the lockup at full
+  // resolution and full frame rate; the canvas path is a 480px buffer at 15fps,
+  // which is the right trade on a phone that cannot do the blend at all and the
+  // wrong one on a machine that can.
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
   const stack = document.querySelector('.hero-stack');
   const source = document.getElementById('hero-mark');
   const canvas = document.getElementById('hero-mark-canvas');
