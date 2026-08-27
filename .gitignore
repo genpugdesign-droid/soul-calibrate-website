@@ -1,0 +1,3 @@
+# scratch probes written next to the page while testing in headless Chrome
+_*.html
+.DS_Store

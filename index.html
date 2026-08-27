@@ -13,37 +13,96 @@
 <body>
 
 <div class="crt-overlay" aria-hidden="true"></div>
+<svg class="filter-defs" aria-hidden="true" focusable="false" width="0" height="0">
+  <filter id="fisheye" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feImage href="assets/img/fisheye-map.png" preserveAspectRatio="none"
+             x="0" y="0" width="100%" height="100%" result="map"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="25"
+                       xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 
 <header class="site-header" id="site-header">
-  <a class="logo" href="#top">[<span>magi</span>]</a>
-  <nav class="site-nav">
-    <a href="#problem">&gt; problem</a>
+  <a class="logo" href="#top" aria-label="magi — top">
+    <img class="logo-lockup" src="assets/img/magi-lockup-v2.png" alt="magi">
+  </a>
+  <button class="nav-toggle" id="nav-toggle" type="button"
+          aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+  <nav class="site-nav" id="site-nav">
     <a href="#company">&gt; company</a>
-    <a href="#founders">&gt; founders</a>
+    <a href="#problem">&gt; problem</a>
+    <a href="#team">&gt; team</a>
+    <a href="#demo">&gt; demo</a>
+    <a href="#dojos">&gt; dojos</a>
   </nav>
 </header>
 
 <main>
 
   <section class="hero" id="top">
-    <div class="logo-placeholder" aria-hidden="true">
-      <span class="logo-placeholder-text">[ ANIMATED LOGO — COMING SOON ]</span>
+
+    <!-- Background. The CRT loader video is gone: it sat dead centre, which is
+         where the wordmark belongs, and a looping video competing with the
+         lockup is what pushed the lockup into a corner in the first place.
+         Diamonds drift up in its place — the same mark the HUD uses for a
+         committed state, so the field is built from the product's own
+         vocabulary. Populated by main.js. -->
+    <div class="hero-field" aria-hidden="true">
+      <div class="hero-diamonds" id="hero-diamonds"></div>
+      <div class="hero-scanlines"></div>
+      <div class="hero-glare"></div>
     </div>
-    <h1 class="hero-title">magi</h1>
-    <div class="forged-by">
-      <span class="forged-by-text">Forged by</span>
-      <img class="sz-logo" src="assets/img/sz-labs-logo.png" alt="SZ Labs">
+
+    <!-- The wordmark, centred. The liquid-metal lockup carries both the mark
+         and the letterforms, so there is no typed `magi` any more. -->
+    <div class="hero-stack">
+    <h1 class="hero-title">
+      <span class="visually-hidden">magi</span>
+      <!-- The lockup is a VIDEO so the liquid metal actually moves. The source
+           is H.264, which has no alpha, and its background is light grey — the
+           inverse of this site. It is keyed out in CSS rather than in the file:
+           invert flips the grey to near-black and the dark logo to bright,
+           contrast crushes what is left of the background to true black, and
+           `mix-blend-mode: screen` makes true black contribute nothing. See
+           .hero-mark in style.css. -->
+      <video class="hero-mark" id="hero-mark" autoplay muted loop playsinline
+             preload="auto" aria-hidden="true" width="2880" height="1080">
+        <source src="assets/video/magi-liquid-metal.mp4" type="video/mp4">
+      </video>
+    </h1>
+
+      <!-- Directly under the lockup and centred on it, so the claim reads as
+           the lockup's own caption rather than as unrelated corner copy.
+           main.js types it out once the page has loaded. -->
+      <p class="hero-sub" id="hero-sub">&gt; <span class="hl">Grappling Software</span> providing machine verification of human energy.<span class="cursor">_</span></p>
     </div>
-    <p class="hero-sub">&gt; Grappling Software identifying the flow of human energy<span class="cursor">_</span></p>
-    <a class="cta" href="#problem">[ scroll_to_begin ]</a>
+
+    <!-- One baseline across the foot of the hero: the entry point on the left,
+         the attribution on the right, sharing a horizontal line. -->
+    <div class="hero-baseline">
+      <a class="cta-dot" href="#company" aria-label="Learn more — scroll to the story">
+        <span class="cta-dot-label">LEARN<br>MORE</span>
+        <span class="cta-dot-arrow" aria-hidden="true">&darr;</span>
+      </a>
+
+      <div class="forged-by hero-forged">
+        <span class="forged-by-text">Forged by</span>
+        <img class="sz-logo" src="assets/img/sz-labs-logo.png" alt="SZ Labs">
+      </div>
+    </div>
+
   </section>
 
   <section class="deck-section" id="deck">
 
     <div class="video-bg-wrap" id="video-bg-wrap">
       <video class="bg-video" id="bg-video" muted playsinline preload="auto">
-        <source src="assets/video/magi_throw.mp4" type="video/mp4">
+        <source src="assets/video/throw_asset_no_bg.mp4" type="video/mp4">
       </video>
+      <button class="deck-toggle" id="deck-toggle" type="button" aria-expanded="true" aria-controls="cards-col">[ &raquo; ]</button>
+      <div class="video-cursor" id="video-cursor" aria-hidden="true">UCHI-MATA!</div>
       <div class="video-placeholder" id="video-placeholder">
         <pre class="ascii-static" id="ascii-static" aria-hidden="true"></pre>
         <div class="signal-box">
@@ -53,37 +112,95 @@
       </div>
     </div>
 
-    <div class="cards-col">
-
-      <div class="card-slot">
-        <article class="deck-card" id="problem">
-          <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">01_problem.txt</span></div>
-          <div class="term-body">
-            <span class="card-tag tag-red">// PROBLEM</span>
-            <h2>[EDIT: the problem headline]</h2>
-            <p>[EDIT: describe the problem your startup solves — who feels it, why it's urgent, what happens if it stays unsolved.]</p>
-          </div>
-        </article>
-      </div>
+    <div class="cards-col" id="cards-col">
 
       <div class="card-slot">
         <article class="deck-card" id="company">
-          <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">02_company.txt</span></div>
+          <header class="card-head accent-blue">
+            <span class="card-idx">01</span>
+            <h2 class="card-name">COMPANY</h2>
+            <span class="card-rail" aria-hidden="true"></span>
+            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
+          </header>
           <div class="term-body">
-            <span class="card-tag tag-blue">// COMPANY</span>
-            <h2>[EDIT: about the magi system]</h2>
-            <p>[EDIT: what the company builds, the approach, and why it's the right answer to the problem above.]</p>
+            <div class="company-mark">
+              <img class="pentacle sz-mark" src="assets/img/sz-labs-logo.png" alt="SZ Labs">
+              <div class="company-mark-text">
+                <h2>Seiryoku Zenyo Labs</h2>
+              </div>
+            </div>
+            <p>We are named for the judo principle of <em>seiryoku zenyo</em> &mdash; maximum efficiency, minimal effort.</p>
+            <p>In Kano&rsquo;s writing the phrase is not about doing less. It is about spending force only where it actually does work: meeting a push by turning with it, taking balance before strength ever has to matter, letting an opponent&rsquo;s own momentum finish the throw. Effort that does not change the outcome is waste.</p>
+            <p>The lab is built the same way. Capture software, a frame-accurate review pipeline, and verified clip kits &mdash; the whole chain from the camera on the wall to the event log, with nothing spent on work that does not move the outcome.</p>
           </div>
         </article>
       </div>
 
       <div class="card-slot">
-        <article class="deck-card" id="founders">
-          <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">03_founders.txt</span></div>
+        <article class="deck-card" id="problem">
+          <header class="card-head accent-red">
+            <span class="card-idx">02</span>
+            <h2 class="card-name">PROBLEM</h2>
+            <span class="card-rail" aria-hidden="true"></span>
+            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
+          </header>
           <div class="term-body">
-            <span class="card-tag tag-red">// FOUNDERS</span>
-            <h2>[EDIT: the team]</h2>
-            <p>[EDIT: founder names, backgrounds, and why this team is the one to build it.]</p>
+            <h2>GRAPPLING BREAKS<br>COMPUTER VISION</h2>
+            <p>Every pose model in production assumes bodies stay separate. Grappling is the sport where they don't.</p>
+            <p>From the first grip, two athletes occupy one silhouette. Limbs vanish behind torsos, keypoints jump between people, and the tracker rebinds identities in the exact half-second the throw resolves. On the ground it inverts: almost no motion, almost all the meaning.</p>
+            <ul class="fail-list">
+              <li>occlusion &mdash; the decisive frames are the most hidden ones</li>
+              <li>identity swap &mdash; thrower and thrown trade skeletons mid-technique</li>
+              <li>ground phase &mdash; minimal movement, maximum consequence</li>
+              <li>ground truth &mdash; labels require someone who knows the sport</li>
+            </ul>
+            <p>Systems that can call a sprint split or a jump shot still can't tell you what just happened on the mat.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="card-slot">
+        <article class="deck-card" id="team">
+          <header class="card-head accent-red">
+            <span class="card-idx">03</span>
+            <h2 class="card-name">TEAM</h2>
+            <span class="card-rail" aria-hidden="true"></span>
+            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
+          </header>
+          <div class="term-body">
+            <div class="company-mark">
+              <img class="pentacle" src="assets/img/ajam-white.png" alt="AJAM mark">
+              <div class="company-mark-text">
+                <h2>ABOUT US</h2>
+                <p class="mark-sub">researchers. designers. grapplers. all in one.</p>
+              </div>
+            </div>
+            <ul class="team-list">
+              <li class="member">
+                <img class="member-shot" src="assets/img/shaker.jpg" alt="Shaker Zaman">
+                <div class="member-text">
+                  <h3>Shaker Zaman</h3>
+                  <p class="member-role">CEO, Founder &mdash; Operations &amp; Engineering</p>
+                  <p class="member-bio">Builds the capture side and runs the floor: rigs the cameras, keeps the review pipeline honest, turns mat time into usable data.</p>
+                </div>
+              </li>
+              <li class="member">
+                <img class="member-shot" src="assets/img/genevieve.png" alt="Genevieve Puglissi">
+                <div class="member-text">
+                  <h3>Genevieve Puglissi</h3>
+                  <p class="member-role">CXO, Co-Founder &mdash; Design &amp; Product</p>
+                  <p class="member-bio">Owns the product surface &mdash; the capture software an operator runs, the review tooling behind it, and how the system reads from the mat side.</p>
+                </div>
+              </li>
+              <li class="member">
+                <img class="member-shot" src="assets/img/maria.png" alt="Maria Galanty">
+                <div class="member-text">
+                  <h3>Maria Galanty</h3>
+                  <p class="member-role">AI Engineering Intern &mdash; Fordham Computer Science &rsquo;28</p>
+                  <p class="member-bio">A brown belt who trains what she labels. Works the detection models and reads footage the way a competitor does, not a dataset.</p>
+                </div>
+              </li>
+            </ul>
           </div>
         </article>
       </div>
@@ -92,11 +209,61 @@
 
   </section>
 
+  <section class="demo" id="demo">
+    <div class="demo-head">
+      <span class="card-tag tag-blue">// DEMO</span>
+      <h2>EXPERIENCE MAGI VISION</h2>
+      <p>Start a session in <img class="wm" src="assets/img/magi-wordmark-white.png" alt="magi"> system and watch the state commit as it
+        happens &mdash; grip, kuzushi, the throw. <img class="wm" src="assets/img/magi-wordmark-white.png" alt="magi"> dashboard aggregates what came
+        off the mat and hands back the highlights. Nothing here is staged: it is the build,
+        running.</p>
+    </div>
+
+    <div class="demo-frame" id="demo-frame">
+      <iframe id="demo-embed" src="app/index.html" title="magi — dashboard and system"
+              loading="lazy" allow="autoplay"></iframe>
+    </div>
+    <p class="demo-note">Scaled to fit this page &mdash;
+      <a href="app/index.html" target="_blank" rel="noopener">open it full screen</a>.</p>
+
+  </section>
+
+  <section class="dojos" id="dojos">
+    <div class="dojos-head">
+      <span class="card-tag tag-blue">// DOJOS</span>
+      <h2>Where the footage comes from</h2>
+      <p>The mats that let us point cameras at their rounds.</p>
+    </div>
+    <ul class="dojo-row">
+      <li class="dojo">
+        <a href="https://kanomartialartsnyc.com/" target="_blank" rel="noopener noreferrer">
+          <span class="dojo-badge"><img src="assets/img/kano.png" alt="Kano Martial Arts"></span>
+          <span class="dojo-name">Kano Martial Arts</span>
+          <span class="dojo-loc">Manhattan, NY</span>
+        </a>
+      </li>
+      <li class="dojo">
+        <a href="https://krystekjudo.com/" target="_blank" rel="noopener noreferrer">
+          <span class="dojo-badge"><img src="assets/img/krystek.png" alt="Krystek Martial Arts"></span>
+          <span class="dojo-name">Krystek Martial Arts</span>
+          <span class="dojo-loc">Queens, NY</span>
+        </a>
+      </li>
+      <li class="dojo">
+        <a href="https://www.thedojonyc.com/" target="_blank" rel="noopener noreferrer">
+          <span class="dojo-badge"><img src="assets/img/thedojo.png" alt="The Dojo"></span>
+          <span class="dojo-name">The Dojo</span>
+          <span class="dojo-loc">Brooklyn, NY</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+
 </main>
 
 <footer class="site-footer">
   <span>[ © <span id="year"></span> magi ]</span>
-  <span class="footer-links">[EDIT: contact / social links]</span>
+  <span class="footer-links"><a href="mailto:shakerzaman@gmail.com">shakerzaman@gmail.com</a></span>
 </footer>
 
 <script src="js/main.js"></script>

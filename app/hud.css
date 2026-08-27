@@ -1,0 +1,1277 @@
+/* ============================================================================
+   Soul Calibrate — Live HUD v3  ·  design scaffolding
+   ----------------------------------------------------------------------------
+   v3 moves the system from "cyberpunk = coloured" to "cyberpunk = instrument".
+   The base is MONOCHROME: hairline white on black, measurement grid, corner
+   reticles, ASCII rails. Electric blue and electric red are now RARE — they
+   appear only where the system is making or withholding a claim:
+
+       red   ATTACK / GROUND, uke unbound, recording
+       blue  binder bound, consent granted
+
+   Everything else is ink. An accent that appears everywhere signals nothing.
+
+   Panels are notched rather than uniformly rounded, and every one of them
+   collapses to its title bar in place.
+
+   DESIGN SCAFFOLDING ONLY — no camera, no detector, no recorder, writes nothing.
+   ========================================================================== */
+
+:root {
+  /* Ground */
+  --void:      #04050a;
+  --glass-rgb: 8 11 17;
+
+  /* The two accents, used sparingly. Stored as triplets so every tint derives. */
+  --blue-rgb:  77 220 255;   /* #4DDCFF */
+  --red-rgb:   255 32 56;
+  --blue:      rgb(var(--blue-rgb));
+  --red:       rgb(var(--red-rgb));
+  /* Electric red cannot clear 4.5:1 as body text at any size — contrast_audit.py */
+  --red-text:  color-mix(in srgb, var(--red) 66%, #ffffff);
+
+  /* Ink — all three pinned to a measured WCAG AA ratio */
+  --ink:      #eef2f7;   /* values */
+  --ink-mid:  #b4bdc9;   /* labels */
+  --ink-dim:  #939cac;   /* annotations — the AA floor, do not dim further */
+
+  /* Structure is drawn in WHITE, not accent. This is the single biggest
+     change in v3: borders, rules, reticles and rails are all neutral. */
+  /* RAISED IN v6, and the audit is why. A 0.26 rim was legible in v5 because
+     it sat on GLASS — a panel whose ground was lit by the footage behind it.
+     On an opaque near-black panel the same alpha composites to #3c3f46 and
+     lands at 1.92:1, well under the 3:1 the audit holds rims to. Opaque
+     grounds are cheaper for text and dearer for hairlines; this is the bill. */
+  --line:      rgb(214 224 238 / 0.42);
+  --line-soft: rgb(214 224 238 / 0.16);
+
+  /* Type scale (cqh = 1% of viewport height, so type tracks the feed) */
+  --fs-value: 1.72cqh;
+  --fs-label: 1.48cqh;
+  --fs-head:  1.34cqh;
+  --fs-micro: 1.30cqh;
+  --fs-name:  2.10cqh;
+
+  /* Glass is a token, not a literal, so a theme swaps it in one place.
+     brightness() bounds the top of the backdrop range; the light theme adds
+     contrast() to lift the bottom, because brightness cannot lift black. */
+  /* Drum spacing. Like --reel-r before it, this has to GROW as the stage
+     shrinks: the slot type carries a px floor while the drum is measured in
+     cqh, so the geometry closes on the type at small sizes. */
+  --reel-gap: 1.35cqh;
+
+  /* v6: the chrome no longer floats on the feed, so a panel ground is a real
+     colour instead of a tint over unknown footage. The --glass-* pair below
+     survives for the ONE element still laid over the mat — the throw card. */
+  --surface:   #06070b;
+  --surface-2: #0b0d13;   /* header bars, one step up from the body */
+
+  --glass-alpha:  0.62;
+  --glass-filter: blur(20px) saturate(1.25) brightness(0.20);
+
+  --radius: 10px;
+  --notch:  16px;
+  /* Drum radius. The far slots sit at sin(d * step) of this, so it sets both
+     the spread and whether an end state's furthest slot stays inside the mask.
+     It has to GROW as the stage shrinks, because the type has a px floor while
+     the drum is measured in cqw. */
+  --reel-r: 25cqw;
+
+  /* Easy ease throughout. STATE changes are 100ms — a committed state must
+     land, not glide. Interface gestures (collapsing a panel) keep a longer
+     curve because they are the operator's motion, not the system's. */
+  --ease:      cubic-bezier(0.42, 0, 0.58, 1);
+  --dur-state: 100ms;
+  --dur-ui:    190ms;
+
+  --font-mono: "SF Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --font-ui:   "Inter", "SF Pro Display", system-ui, -apple-system, sans-serif;
+}
+
+/* ── Light theme ─────────────────────────────────────────────────────────────
+   Same low tint, inverted ground. The worst case FLIPS: dark text on a light
+   panel is hardest over a BLACK frame, where the panel lands on mid-grey. So
+   the light theme adds contrast() to raise the floor, and every token is
+   darker than its dark-theme counterpart. Verified in contrast_audit.py.
+
+   Honest cost: contrast(0.22) flattens the footage more than the dark theme's
+   plain brightness(0.20) does, so less of the mat reads through a light panel
+   at the same alpha, and the accents lose their electric quality. That is
+   inherent to putting dark text over live video, not a tuning miss. */
+.viewport[data-theme="light"] {
+  --void:      #e9ecf1;
+  --glass-rgb: 255 255 255;
+  --surface:   #eef1f6;
+  --surface-2: #e4e8ef;
+  --glass-alpha:  0.72;
+  --glass-filter: blur(20px) saturate(1.05) contrast(0.22) brightness(1.45);
+
+  --ink:      #0b0e13;
+  --ink-mid:  #39414e;
+  --ink-dim:  #3f454f;
+
+  --blue:     #004869;
+  --red:      #ba1729;
+  --red-text: #8a111e;
+  --blue-rgb: 0 72 105;
+  --red-rgb:  186 23 41;
+
+  --line:      rgb(24 30 40 / 0.50);
+  --line-soft: rgb(24 30 40 / 0.20);
+}
+/* Chrome that reads as "lit" in the dark theme has to read as "inked" here. */
+.viewport[data-theme="light"] .panel-head,
+.viewport[data-theme="light"] .reel-head { background: rgb(24 30 40 / 0.05); }
+.viewport[data-theme="light"] .panel-head:hover,
+.viewport[data-theme="light"] .reel-head:hover { background: rgb(24 30 40 / 0.10); }
+.viewport[data-theme="light"] .meter-track { background: rgb(24 30 40 / 0.12); }
+.viewport[data-theme="light"] .pill { background: rgb(255 255 255 / 0.4); }
+.viewport[data-theme="light"] .brand-mark,
+.viewport[data-theme="light"] .ajam,
+.viewport[data-theme="light"] .panel::after { background: var(--ink); }
+.viewport[data-theme="light"] .brand-mark { filter: none; }
+.viewport[data-theme="light"] .slot-badge { color: #fff; background: var(--ink-mid); }
+.viewport[data-theme="light"] .role-uke .slot-badge { color: #fff; }
+.viewport[data-theme="light"] .feed-grade {
+  background: radial-gradient(ellipse 62% 46% at 50% 50%,
+    rgb(233 236 241 / 0.34) 0%, rgb(233 236 241 / 0.10) 60%, transparent 100%);
+}
+.viewport[data-theme="light"] .panel,
+.viewport[data-theme="light"] .c-combat,
+.viewport[data-theme="light"] .topbar,
+.viewport[data-theme="light"] .strip {
+  box-shadow: 0 0 2.2cqh rgb(24 30 40 / 0.06), 0 1.2cqh 3.2cqh rgb(24 30 40 / 0.18);
+}
+.viewport[data-theme="light"] .reel-item.is-committed { text-shadow: none; }
+.viewport[data-theme="light"] .brand-name { text-shadow: none; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  overflow: hidden;
+}
+
+/* ── Stage ───────────────────────────────────────────────────────────────── */
+.stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  background: var(--void);
+}
+
+.viewport {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  background: var(--void);
+  overflow: hidden;
+  container-type: size;
+  container-name: viewport;
+}
+
+/* ── The feed window ─────────────────────────────────────────────────────────
+   THE v6 MOVE. Through v5 the footage was the page background and every card
+   was glass laid over it, which made contrast a function of whatever happened
+   to be on the mat — the whole reason contrast_audit.py had to model a
+   blown-out gi. Here the feed is a framed window in the centre column and the
+   chrome sits on solid ground beside it. The instrument stops floating on the
+   mat, and the mat stops being the instrument's background. */
+.feed-window {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #000 url("poster.jpg") center / cover no-repeat;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.feed-window video,
+.feed-window .feed-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.feed-fallback {
+  display: grid;
+  place-items: center;
+  background: rgb(3 5 9 / 0.55);
+  color: var(--ink-mid);
+  font-family: var(--font-mono);
+  font-size: 1.3cqw;
+  letter-spacing: 0.18em;
+  text-align: center;
+  padding: 2cqw;
+  line-height: 2;
+}
+
+/* The grade no longer has rails to seat — the window has a rim for that. It
+   only darkens the band the throw card lands in, so the card has something to
+   sit against on a bright mat. */
+.feed-grade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 62% 46% at 50% 50%,
+    rgba(3,5,9,0.34) 0%, rgba(3,5,9,0.10) 60%, transparent 100%);
+}
+
+/* ── Brand + artifact marks ──────────────────────────────────────────────────
+   Both marks are the real exported PNGs, used as MASKS rather than <img>, so
+   they take `background` as their colour and can be lit with a drop-shadow
+   glow like any other element in the system.
+
+   NOTE: the square measurement grid from v3 is gone. It was legible chrome but
+   it sat directly on the mat, and the feed is the thing being judged. */
+.brand-mark,
+.ajam {
+  background: var(--ink);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+.brand-mark {
+  -webkit-mask-image: url("assets/pentacle_magi_white.png");
+  mask-image: url("assets/pentacle_magi_white.png");
+  width: 3.4cqh;
+  height: 3.4cqh;
+  flex: none;
+  filter: drop-shadow(0 0 0.8cqh rgb(255 255 255 / 0.35));
+}
+.brand-mark.sm { width: 2.2cqh; height: 2.2cqh; }
+.ajam {
+  -webkit-mask-image: url("assets/ajam_white.png");
+  mask-image: url("assets/ajam_white.png");
+  width: 1.4cqh;
+  height: 1.4cqh;
+}
+
+/* Now bounded by the feed window rather than the whole page, so they read as
+   the camera's framing instead of the browser's. */
+.reticles { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
+
+.reticle {
+  position: absolute;
+  width: 3.4cqh;
+  height: 3.4cqh;
+  border: 1px solid var(--line);
+}
+.reticle.tl { top: 1.2cqh;    left: 0.9cqw;  border-right: 0; border-bottom: 0; }
+.reticle.tr { top: 1.2cqh;    right: 0.9cqw; border-left: 0;  border-bottom: 0; }
+.reticle.bl { bottom: 1.2cqh; left: 0.9cqw;  border-right: 0; border-top: 0; }
+.reticle.br { bottom: 1.2cqh; right: 0.9cqw; border-left: 0;  border-top: 0; }
+
+/* The ajam mark, used sparingly in open frame. Pure texture: carries no data
+   and never moves. */
+.reticles .ajam { position: absolute; opacity: 0.42; }
+.reticles .ajam.a1 { top: 9cqh;  left: 7cqw; }
+.reticles .ajam.a2 { top: 74cqh; right: 6cqw; }
+
+/* ── ASCII accents ───────────────────────────────────────────────────────── */
+/* Filled from JS. Texture, not data — never used to carry a value. */
+.ascii {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+}
+.ascii.dim { opacity: 0.55; }
+
+/* ── HUD layout ──────────────────────────────────────────────────────────── */
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  --pad-x: 1.6cqw;
+  padding: 1.4cqh var(--pad-x) 1.2cqh;
+  display: grid;
+  grid-template-columns: minmax(0, 19.5cqw) minmax(0, 1fr) minmax(0, 21.5cqw);
+  /* The centre row takes the slack: the feed window grows and shrinks, and
+     every rail and panel around it keeps its intrinsic height. */
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "topbar topbar topbar"
+    "left   mid    right"
+    "strip  strip  strip";
+  gap: 1.2cqh 1.2cqw;
+}
+
+.col { display: flex; flex-direction: column; gap: 1.2cqh; min-height: 0; }
+.col-left  { grid-area: left; }
+.col-mid   { grid-area: mid; }
+.col-right { grid-area: right; }
+
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+.topbar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  gap: 0.95cqw;
+  padding: 0.9cqh 1.2cqw;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+/* MAGI SYSTEM lockup — the pentacle sits left of the wordmark. */
+.brand { display: flex; align-items: center; gap: 0.8cqw; flex: none; }
+.brand-name {
+  font-family: var(--font-ui);
+  font-size: 2.1cqh;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: var(--ink);
+  line-height: 1;
+  text-shadow: 0 0 1.6cqh rgb(255 255 255 / 0.25);
+}
+.brand-name i {
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.34em;
+  color: var(--ink-mid);
+  margin-left: 0.5cqw;
+}
+.tb-seg { display: flex; align-items: baseline; gap: 0.6cqw; white-space: nowrap; }
+.tb-seg i {
+  font-style: normal;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.2em;
+  color: var(--ink-dim);
+}
+.tb-seg b {
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--ink);
+}
+.tb-seg b.ok { color: var(--blue); }   /* consent granted — a real claim */
+.tb-rule { color: var(--ink-dim); font-size: var(--fs-label); letter-spacing: 0.2em; }
+.topbar .ascii { flex: 1 1 0; min-width: 0; order: 9; }
+/* The rail is the first thing to go when the bar runs out of room — it is
+   texture, and the session fields beside it are not. */
+@container viewport (max-width: 1500px) { .topbar .ascii { display: none; } }
+.topbar .tb-seg { flex: none; }
+
+/* ── Panels ──────────────────────────────────────────────────────────────────
+   Not all rectangles. Each panel is clipped to a notched silhouette; the 1px
+   rim is the element's own background showing through a 1px inset fill, so the
+   outline follows the notch instead of being cut off by it. */
+.panel {
+  position: relative;
+  min-height: 0;
+  background: var(--line);          /* becomes the 1px rim */
+  --shape: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  clip-path: var(--shape);
+  transition: background var(--dur-state) var(--ease);
+}
+.panel.notch-tr {
+  --shape: polygon(0 0, calc(100% - var(--notch)) 0, 100% var(--notch), 100% 100%, 0 100%);
+}
+.panel.notch-bl {
+  --shape: polygon(0 0, 100% 0, 100% 100%, var(--notch) 100%, 0 calc(100% - var(--notch)));
+}
+.panel.notch-tr.notch-bl {
+  --shape: polygon(
+    0 0, calc(100% - var(--notch)) 0, 100% var(--notch),
+    100% 100%, var(--notch) 100%, 0 calc(100% - var(--notch)));
+}
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  clip-path: var(--shape);
+  /* OPAQUE as of v6. There is no footage behind a panel any more, so the
+     ground is a known colour and contrast stops being a function of the mat.
+     The faint gradient is lighting, not tint — it does not change the floor
+     the audit measures against. */
+  background:
+    linear-gradient(165deg,
+      rgb(255 255 255 / 0.035) 0%,
+      rgb(255 255 255 / 0.010) 46%,
+      rgb(255 255 255 / 0.000) 100%),
+    var(--surface);
+}
+.panel > * { position: relative; z-index: 1; }
+
+/* v5 gave every card a lift-glow and a drop shadow, which is what a pane of
+   glass floating over footage needs. Flush panels on a solid ground do not
+   float, and a shadow with nothing to cast onto just muddies the rim — so the
+   whole ceiling is gone. The throw card is the one element still over the mat
+   and the only one that still lifts. */
+.panel, .c-combat, .topbar, .strip { box-shadow: none; }
+
+/* The ajam mark recurs at the corner of every panel. */
+.panel::after {
+  content: "";
+  position: absolute;
+  right: 0.7cqh;
+  bottom: 0.7cqh;
+  width: 1.2cqh;
+  height: 1.2cqh;
+  z-index: 2;
+  opacity: 0.4;
+  pointer-events: none;
+  background: var(--ink);
+  -webkit-mask: url("assets/ajam_white.png") center / contain no-repeat;
+  mask: url("assets/ajam_white.png") center / contain no-repeat;
+}
+.panel.is-collapsed::after { display: none; }
+
+/* Hot panels are the ONE place a panel rim turns red. */
+.panel.is-hot { background: rgb(var(--red-rgb) / 0.55); }
+
+/* ── Panel header / collapse ─────────────────────────────────────────────── */
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8cqw;
+  width: 100%;
+  padding: 1cqh 1.3cqh;
+  font: inherit;
+  font-family: var(--font-mono);
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--dur-ui) var(--ease);
+}
+.panel-head:hover { background: rgb(255 255 255 / 0.09); }
+.panel-head:focus-visible { outline: 1px solid var(--ink); outline-offset: -3px; }
+
+.panel-title {
+  font-size: var(--fs-head);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.panel-key {
+  font-size: var(--fs-micro);
+  color: var(--ink-dim);
+  letter-spacing: 0.16em;
+}
+/* Toggle chevron — the only moving part of the header */
+/* Open/close signifier. Held at least 5px clear of the right border on every
+   card, and eased on the same curve as the panel it drives. */
+.panel-toggle {
+  margin-left: auto;
+  margin-right: max(5px, 0.5cqh);
+  width: 1cqh;
+  height: 1cqh;
+  flex: none;
+  border-right: 1.5px solid var(--ink-mid);
+  border-bottom: 1.5px solid var(--ink-mid);
+  transform: rotate(45deg) translateY(-15%);
+  transition: transform var(--dur-ui) var(--ease),
+              border-color var(--dur-ui) var(--ease);
+}
+.panel-head:hover .panel-toggle { border-color: var(--ink); }
+.is-collapsed .panel-toggle { transform: rotate(-135deg) translateY(-15%); }
+/* The combat drawer opens upward, so its arrow starts pointing up. */
+.panel-toggle.up { transform: rotate(-135deg) translateY(-15%); }
+.c-combat.is-collapsed .panel-toggle.up { transform: rotate(45deg) translateY(-15%); }
+
+/* One token so the rows can bleed back through it exactly. */
+:root { --body-pad-x: 1.3cqh; }
+.panel-body { padding: 1.2cqh var(--body-pad-x) 1.4cqh; overflow: hidden; }
+
+/* Collapsed: the body is gone, the TITLE BAR REMAINS. The operator never loses
+   track of which panel is which while it is shut. */
+.panel.is-collapsed .panel-body { display: none; }
+.panel.is-collapsed .panel-head { border-bottom: 0; }
+.panel.is-collapsed { align-self: start; }
+
+/* ── Rows ────────────────────────────────────────────────────────────────── */
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1cqh;
+  font-family: var(--font-mono);
+  font-size: var(--fs-value);
+  line-height: 1.75;
+  white-space: nowrap;
+}
+.row .k { color: var(--ink-mid); font-size: var(--fs-label); letter-spacing: 0.06em; }
+.row .v {
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-state) var(--ease);
+}
+.v.tick { animation: tick 320ms var(--ease); }
+@keyframes tick { 0% { color: #ffffff; } 100% { color: inherit; } }
+
+/* ── Capture status ──────────────────────────────────────────────────────── */
+.rec-dot {
+  width: 1.1cqh; height: 1.1cqh; flex: none;
+  background: var(--ink-mid);
+  transition: background var(--dur-state) var(--ease);
+}
+.is-recording .rec-dot { background: var(--red); animation: recPulse 1.4s var(--ease) infinite; }
+.is-recording .panel-title { color: var(--red-text); }
+@keyframes recPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ── Meters ──────────────────────────────────────────────────────────────── */
+.meter { margin-bottom: 0.9cqh; }
+.meter:last-of-type { margin-bottom: 0.4cqh; }
+.meter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  color: var(--ink-mid);
+  margin-bottom: 0.4cqh;
+}
+.meter-head .w { color: var(--ink-dim); font-size: var(--fs-micro); font-style: normal; }
+.meter-head .val {
+  color: var(--ink);
+  font-size: var(--fs-value);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.meter-track {
+  position: relative;
+  height: 0.7cqh;
+  background: rgb(255 255 255 / 0.07);
+  overflow: hidden;
+}
+/* Neutral by default — a meter only earns colour once it crosses threshold. */
+.meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background: var(--ink-mid);
+  transition: width var(--dur-state) var(--ease),
+              background var(--dur-state) var(--ease);
+}
+.meter-fill.hot { background: var(--red); }
+
+/* ── Roster ──────────────────────────────────────────────────────────────── */
+/* The row BLEEDS through the panel body's horizontal padding, so its tint,
+   its hover glow and its divider all reach the card's outer edge. Inset like
+   the rest of the body, a highlighted row stops ~1.3cqh short of the border
+   and leaves a strip of untinted glass down the right — which reads as the
+   card being out of alignment rather than as the row being padded. Content
+   keeps its inset via the row's own padding. */
+.athlete {
+  position: relative;
+  margin-inline: calc(-1 * var(--body-pad-x));
+  padding: 0.9cqh var(--body-pad-x) 0.9cqh calc(1.4cqh + var(--body-pad-x));
+  border-bottom: 1px solid var(--line-soft);
+}
+.athlete:last-child { border-bottom: 0; padding-bottom: 0.2cqh; }
+.athlete::before {
+  content: "";
+  position: absolute;
+  left: var(--body-pad-x); top: 0.9cqh; bottom: 0.9cqh;
+  width: 2px;
+  background: var(--ink-dim);
+  transition: background var(--dur-state) var(--ease);
+}
+.athlete.role-tori::before { background: var(--red); }
+.athlete.role-uke::before  { background: var(--blue); }
+.athlete.is-unbound::before {
+  background: repeating-linear-gradient(to bottom, var(--red) 0 4px, transparent 4px 8px);
+}
+.athlete.is-unbound { opacity: 0.72; }
+
+.athlete-head { display: flex; align-items: baseline; gap: 0.7cqh; margin-bottom: 0.4cqh; }
+/* P0 / P1 read as hard identity, not as a caption. Filled block, mono, wide. */
+.slot-badge {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--void);
+  background: var(--ink-mid);
+  padding: 0.24cqh 0.62cqh;
+  flex: none;
+  transition: background var(--dur-state) var(--ease);
+}
+.role-tori .slot-badge { background: var(--red); color: #fff; }
+.role-uke  .slot-badge { background: var(--blue); color: var(--void); }
+.athlete-name { font-size: var(--fs-name); font-weight: 700;
+                letter-spacing: 0.08em; color: var(--ink); }
+.athlete-role {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  padding: 0.25cqh 0.7cqh;
+  border: 1px solid currentColor;
+}
+.role-tori .athlete-role { color: var(--red-text); }
+.role-uke  .athlete-role { color: var(--blue); }
+/* A role the system has not earned still occupies the slot. An empty gap reads
+   as a rendering fault; a grey `---` badge reads as "no claim", which is the
+   honest state and keeps the row from reflowing. */
+.athlete-role.is-none {
+  color: var(--ink-dim);
+  border-color: var(--line-soft);
+  background: rgb(255 255 255 / 0.05);
+  letter-spacing: 0.28em;
+}
+
+/* ── THROW DETECTED — centred in open frame ──────────────────────────────────
+   Carries the LEGACY frame sequence from `assets/throw_detected/`.
+
+   v5 kept this docked inside the bottom drawer, which cost the drum and the
+   throw a permanent shared column in the middle of the mat whether or not
+   anything was happening. v6 makes it what it always was — an EVENT. The feed
+   window is clear at rest; the card exists only while a throw is on screen,
+   and it takes the middle of the frame because for those two seconds it is
+   the only thing worth reading.
+
+   It is also the last element in the system laid over live footage, so it is
+   the only one that still needs a lift and a glass ground.
+
+   The authoring canvas is 1938x1098 but the art only occupies a band inside
+   it. --crop-h / --crop-y describe that band as fractions of the canvas, so
+   the slot fits the ART, not the transparent surround. Re-export with a
+   different composition and only these two numbers change. */
+.throw-slot {
+  --crop-h: 0.534;   /* content band height / canvas height  (586/1098) */
+  --crop-y: 0.249;   /* content band top    / canvas height  (273/1098) */
+
+  /* NO REVEAL AT ALL NOW. v6 animated this slot open and shut; v7 keeps the
+     panel permanently mounted, so there is no height to animate and nothing
+     to collapse. The reveal machinery is gone rather than left switched off —
+     what animates instead is the CONTENT: the empty state cross-fades to the
+     asset when a throw commits. */
+  display: block;
+  margin-top: 0.2cqh;
+}
+
+/* The banner leads the card body, in flow: it animates its own wordmark in
+   over ~45 frames, so it is the ALERT's title and it gets the title's
+   position. The box keeps the asset's aspect whether or not the asset is
+   playing, so the panel does not change height when a throw fires — the
+   roster below it never moves. */
+.throw-anim {
+  position: relative;
+  width: 100%;
+  margin-bottom: 0.6cqh;
+}
+
+/* The empty state. `— NO THROW —` rather than a blank box, for the same
+   reason the roster shows `---` instead of dropping a role badge: an empty
+   gap reads as a rendering fault, a dash reads as NO CLAIM, which is the
+   honest state and the one that is true most of the time. */
+.throw-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.26em;
+  color: var(--ink-dim);
+  transition: opacity var(--dur-state) var(--ease);
+}
+.throw-slot.is-open .throw-empty { opacity: 0; }
+.throw-slot:not(.is-open) .throw-anim img { opacity: 0; }
+.throw-slot:not(.is-open) .throw-anim { filter: none; }
+
+/* At rest the panel is a panel: neutral rim, no glow, and the THROW key stops
+   pulsing. Nothing about it should read as an active claim. */
+.throw-slot:not(.is-open) .throw-card { background: var(--line); }
+.throw-slot:not(.is-open) .throw-key {
+  color: var(--ink-dim);
+  animation: none;
+  text-shadow: none;
+}
+/* A status dot in the header, matching the capture panel's REC dot. */
+.throw-dot {
+  width: 1.1cqh; height: 1.1cqh; flex: none;
+  background: var(--ink-dim);
+  transition: background var(--dur-state) var(--ease);
+}
+.throw-slot.is-open .throw-dot { background: var(--red); }
+
+/* The card is an ordinary opaque panel now. v6 needed glass because the card
+   sat on live footage; in v7 NOTHING sits on the footage, so the last
+   backdrop-filter in the interface goes with it — and with it the last case
+   where a label's contrast depended on what was on the mat. */
+.throw-card { transition: background var(--dur-state) var(--ease); }
+.throw-body { padding: 0 1.1cqh 1cqh; }
+
+/* The card's rim carries the state, since the banner cannot: the asset is a
+   fixed cyan export. Red while the throw is the live event, cooling to the
+   asset's own blue once the system settles into RECOVERY and the card is
+   narrating aftermath rather than announcing it.
+
+   This is the one panel rim in the system that is ever an accent — the same
+   licence `.panel.is-hot` already had, for the same reason. */
+.throw-card { background: rgb(var(--blue-rgb) / 0.5); }
+.hud[data-state="ATTACK"] .throw-card,
+.hud[data-state="GROUND"] .throw-card {
+  background: rgb(var(--red-rgb) / 0.6);
+}
+
+/* The tori row still lights up, so the alert stays attributable to a
+   competitor even though the card sits away from the roster. */
+.athlete {
+  transition: background var(--dur-ui) var(--ease),
+              box-shadow var(--dur-ui) var(--ease);
+}
+.athlete.is-throwing {
+  background: linear-gradient(to right, transparent, rgb(var(--red-rgb) / 0.10));
+}
+
+/* Hover picks out one competitor from the pair. The glow is tinted by the role
+   the row is actually carrying, so hovering also re-states who is who. */
+.athlete:hover {
+  background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.07));
+  box-shadow: inset 0 0 3cqh rgb(255 255 255 / 0.06);
+}
+.athlete.role-tori:hover {
+  background: linear-gradient(to right, transparent, rgb(var(--red-rgb) / 0.12));
+  box-shadow: inset 0 0 3cqh rgb(var(--red-rgb) / 0.14),
+              0 0 1.6cqh rgb(var(--red-rgb) / 0.18);
+}
+.athlete.role-uke:hover {
+  background: linear-gradient(to right, transparent, rgb(var(--blue-rgb) / 0.12));
+  box-shadow: inset 0 0 3cqh rgb(var(--blue-rgb) / 0.16),
+              0 0 1.6cqh rgb(var(--blue-rgb) / 0.22);
+}
+.athlete:hover::before {
+  box-shadow: 0 0 1.2cqh currentColor;
+  filter: brightness(1.3);
+}
+.athlete:hover .athlete-name { color: #fff; }
+.viewport[data-theme="light"] .athlete:hover .athlete-name { color: #000; }
+
+/* The animation window. Height is derived from the crop band, and the frame is
+   pulled up inside it so the art fills the box. */
+.throw-anim {
+  aspect-ratio: 1938 / 586;
+  overflow: hidden;
+  filter: drop-shadow(0 0 1.4cqh rgb(var(--red-rgb) / 0.4));
+}
+/* The REVEAL MOVED TO THE IMAGE. It used to sit on this box, which was fine
+   while the box only existed during a throw — but the box is permanent now
+   and holds the empty state, so hiding the box hid `— NO THROW —` along with
+   it. The frame drops into place; its container never leaves. */
+.throw-anim img { transform: translateY(-1.4cqh); }
+.throw-slot.is-open .throw-anim img { transform: translateY(0); }
+.throw-anim img {
+  transition: opacity   var(--dur-state) var(--ease),
+              transform var(--dur-ui)    var(--ease);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: calc(100% / var(--crop-h));
+  top: calc(-1 * var(--crop-y) / var(--crop-h) * 100%);
+  display: block;
+}
+/* Until the sequence has decoded, the slot still has to say something. */
+.throw-anim.is-waiting::after {
+  content: "LOADING SEQUENCE";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.24em;
+  color: var(--red-text);
+}
+
+/* One slim line. Score and entry already sit in the pills below, so this
+   carries only the claim word and the asset it is playing. */
+.throw-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7cqw;
+  flex-wrap: wrap;
+  row-gap: 0.2cqh;
+  margin-top: 0.2cqh;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--ink-mid);
+  padding-bottom: 0.5cqh;
+  border-bottom: 1px solid var(--line-soft);
+}
+/* The rail is texture and the asset id is not, so the rail is what goes when
+   the column runs out of room — same rule as the top bar's. */
+.throw-meta .ascii { display: none; }
+.throw-note { white-space: nowrap; }
+.throw-key {
+  color: var(--red-text);
+  letter-spacing: 0.2em;
+  animation: throwGlow 1.5s var(--ease) infinite;
+}
+@keyframes throwGlow {
+  0%, 100% { text-shadow: 0 0 0.8cqh rgb(var(--red-rgb) / 0.4); }
+  50%      { text-shadow: 0 0 2cqh   rgb(var(--red-rgb) / 0.9); }
+}
+.throw-meta .ascii { flex: 1; min-width: 0; }
+.throw-note { color: var(--ink-dim); font-weight: 400; }
+
+/* ── Theme toggle ────────────────────────────────────────────────────────── */
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5cqw;
+  flex: none;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.18em;
+  color: var(--ink-mid);
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 0.3cqh 0.7cqh;
+  cursor: pointer;
+  transition: color var(--dur-ui) var(--ease), border-color var(--dur-ui) var(--ease);
+}
+.theme-btn:hover { color: var(--ink); border-color: var(--ink-mid); }
+.theme-dot {
+  width: 0.9cqh;
+  height: 0.9cqh;
+  border: 1px solid currentColor;
+  background: linear-gradient(to right, currentColor 50%, transparent 50%);
+}
+
+/* Binder state: two accents plus a PATTERN, never a third and fourth hue —
+   nothing here is distinguished by colour alone. */
+.bind { font-size: var(--fs-label); font-weight: 600; letter-spacing: 0.12em; }
+.bind.bound     { color: var(--blue); }
+.bind.tentative { color: var(--ink-mid); }
+.bind.tentative::after { content: " ┄"; }
+.bind.unbound   { color: var(--red-text); }
+
+/* ── Combat state: the committed word, on a bar under the feed ───────────────
+   v5 docked this bottom-centre over the footage as a drawer that unfurled
+   upward, which meant the drum and the throw permanently shared one column of
+   space in the middle of the mat. In v6 the bar sits in the centre column
+   BELOW the feed window: it is chrome, so it lives with the chrome.
+
+   The drum itself moved into the throw card (see below). What stays here is
+   the claim — the committed word — plus the raw stream it was derived from. */
+.c-combat {
+  position: relative;
+  flex: none;
+  z-index: 32;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: border-color var(--dur-state) var(--ease);
+}
+/* The throw card outlives the ATTACK that opened it — it holds through GROUND
+   and RECOVERY so the alert cannot flash past the operator (see hud.js). The
+   bar keeps its rim lit for exactly as long, so the two never disagree about
+   whether a throw is on screen. */
+.c-combat.is-throwing { border-color: rgb(var(--red-rgb) / 0.55); }
+
+.c-combat.is-hot {
+  border-color: rgb(var(--red-rgb) / 0.55);
+  box-shadow:
+    0 0 3.4cqh rgb(var(--red-rgb) / 0.28),
+    0 1.2cqh 3.2cqh rgb(0 0 0 / 0.5);
+}
+
+/* The bar. Always visible, collapsed or not, and it carries the committed
+   state word so shutting the ribbon never hides the claim. */
+.reel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8cqw;
+  width: 100%;
+  padding: 0.7cqh 1.3cqh;
+  font: inherit;
+  font-family: var(--font-mono);
+  background: var(--surface-2);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--dur-ui) var(--ease);
+}
+.c-combat.is-collapsed .reel-head { border-bottom: 0; }
+.reel-head:hover { background: rgb(255 255 255 / 0.09); }
+.reel-head:focus-visible { outline: 1px solid var(--ink); outline-offset: -3px; }
+
+.reel-label {
+  font-size: var(--fs-head);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--ink-mid);
+}
+/* The committed word.
+
+   DOCTRINE, EXTENDED. v3 allowed blue only on `bound` and `consent granted`.
+   v6 adds one more meaning, and only one: blue is what the system is claiming
+   RIGHT NOW. It marks the committed word here, and the live chip in the ribbon
+   below — the same fact stated twice. Red still outranks it wherever the claim
+   is a high-salience event, so a throw never arrives in the calm colour. */
+.reel-now {
+  font-family: var(--font-ui);
+  font-size: var(--fs-value);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--blue);
+  transition: color var(--dur-state) var(--ease);
+}
+.state-ATTACK   .reel-now { color: var(--red); }
+.state-GROUND   .reel-now { color: var(--red-text); }
+.reel-head .ascii { flex: 1; overflow: hidden; }
+
+/* The ribbon drawer. `grid-template-rows: 1fr -> 0fr` animates to the exact
+   content height, the same reveal v5 proved on the throw slot — a max-height
+   guess needs re-tuning at every breakpoint and every time the chip rows
+   rewrap, which is exactly what this drawer does. */
+.ribbon-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows var(--dur-ui) var(--ease),
+              opacity            var(--dur-ui) var(--ease);
+}
+.c-combat.is-collapsed .ribbon-body { grid-template-rows: 0fr; opacity: 0; }
+
+/* ── The raw stream ──────────────────────────────────────────────────────────
+   The eight raw detector states from display_state.DISPLAY_WORD, with the one
+   the detector is emitting right now lit. The bar above says what the system
+   COMMITTED to; this says what it actually saw, which is the pair the display
+   calm layer exists to separate — `entry_candidate` and `off_balance_candidate`
+   both read ENGAGED, `descent` never becomes a badge at all. Seeing the raw
+   word sit under an unchanged committed word is the smoother working.
+
+   Chips are the vocabulary, NOT a timeline: they never re-order, and nothing
+   here is a prediction of what comes next. */
+/* The drum's band inside the drawer. It is centred in a wide block rather
+   than filling it: a reel is a column, and stretching one to the full width
+   of the centre column would read as a banner instead. */
+.drawer-inner { min-height: 0; overflow: hidden; }
+
+.reel-drum {
+  display: grid;
+  place-items: stretch;
+  /* No vertical padding of its own. The drum already carries --inset, and two
+     layers of edge spacing on the same box is how the card ended up reading
+     as mostly air. */
+  padding: 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+/* Full width. The drum was a centred 30cqw column while it was only a stack of
+   words; now that the committed state is a banded row, the band has to reach
+   both ends of the card or it reads as floating in the middle of one. */
+.reel-drum .reel { width: 100%; }
+
+.ribbon {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5cqh 0.5cqw;
+  padding: 0.6cqh 1.1cqh;
+}
+.chip {
+  flex: 1 1 auto;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.13em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink-dim);
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 0.62cqh 0.5cqw;
+  transition: color var(--dur-state) var(--ease),
+              background var(--dur-state) var(--ease),
+              border-color var(--dur-state) var(--ease);
+}
+/* Live: filled, because an outline among outlines is not enough to find at a
+   glance while an athlete is mid-throw. */
+.chip.is-live {
+  color: #04070b;
+  background: var(--blue);
+  border-color: var(--blue);
+  font-weight: 700;
+}
+/* The two raw states that ARE the drama get the drama colour. */
+.chip.is-live.is-hot { background: var(--red); border-color: var(--red); color: #fff; }
+
+.reel {
+  /* A REEL THAT WRAPS. The committed state sits in the MIDDLE and the others
+     ride around it — two above, two below — which is what finally reconciles
+     the two things that fought through every earlier pass:
+
+       centred marker   needs content on both sides of the committed state
+       compact box      cannot afford to RESERVE space for content that is
+                        not there
+
+     A linear list can only satisfy one: at OPEN it has four states below and
+     nothing above, so a centred marker costs ~96px of blank. A wrapping reel
+     satisfies both, because the slots above OPEN are not empty — they hold
+     GROUND and RECOVERY, coming back round.
+
+     That wrap is honest here. OPEN -> ENGAGED -> ATTACK -> GROUND -> RECOVERY
+     -> OPEN is a real cycle: a match returns to OPEN after the aftermath, and
+     the beat sheet in hud.js loops on exactly that. Relative order never
+     changes; only the window onto it moves, which is what a physical reel
+     does. */
+  --slot:  max(11px, 1.25cqh);  /* every state not marked */
+  --lead:  max(19px, 2.05cqh);  /* the committed word; 19px floor is the WCAG
+                                   large-bold threshold — see contrast_audit */
+  --pad:   10px;                /* nominal gap; the drum compresses from here */
+  --inset: 6px;                 /* the box's own edge */
+
+  /* Depth. A shallower perspective and a wider radius make the barrel read as
+     a barrel: far slots foreshorten hard instead of merely sliding. */
+  --reel-r:    7.4cqh;          /* barrel radius — how far back the far slots go */
+  --reel-step: 21deg;           /* one state's worth of rotation */
+
+  position: relative;
+  height: calc(var(--lead) + 4 * var(--slot) + 4 * var(--pad)
+               + 2 * var(--inset));
+  overflow: hidden;
+  perspective: 22cqh;
+  perspective-origin: 50% 50%;
+  /* Softens the top and bottom lip so slots roll out of view rather than
+     being cut off — the wrap only reads as rotation if the edges are not
+     hard. */
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent 0, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom,
+    transparent 0, #000 12%, #000 88%, transparent 100%);
+}
+
+.reel-track { position: absolute; inset: 0; transform-style: preserve-3d; }
+
+/* Each slot sits on the barrel's surface: the origin is pushed BEHIND the
+   element by the radius, so rotating about X swings it around the drum rather
+   than spinning it in place. Perspective then does the rest — the far slots
+   are genuinely further away, so they shrink and compress on their own. */
+.reel-item {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: var(--slot);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink-mid);
+  transform-origin: 50% 50% calc(-1 * var(--reel-r));
+  /* NEGATIVE step: a positive --d is LATER in the cycle and must roll DOWN,
+     so reading top to bottom follows OPEN -> ENGAGED -> ATTACK -> GROUND ->
+     RECOVERY. Without the sign the barrel turns the wrong way and the ramp
+     reads backwards. */
+  transform:
+    translateY(-50%)
+    rotateX(calc(var(--d, 0) * -1 * var(--reel-step)));
+  /* Backface would show the far side of the barrel through the near side. */
+  backface-visibility: hidden;
+  /* NOT faded. Depth here is perspective, foreshortening and size — dimmed
+     text stops clearing 4.5:1 almost immediately, and the states the system
+     is not claiming still have to be readable. */
+  opacity: 1;
+  transition:
+    transform var(--dur-state) var(--ease),
+    color     var(--dur-state) var(--ease),
+    font-size var(--dur-state) var(--ease);
+}
+
+/* THE KEY STATE. Full bleed: the rules run to both ends of the card, so the
+   committed state reads as a band across the instrument rather than a word
+   with a couple of ticks beside it. */
+.reel-item.is-committed {
+  font-size: var(--lead);
+  letter-spacing: 0.12em;
+  color: var(--blue);
+  text-shadow: 0 0 2cqh rgb(var(--blue-rgb) / 0.28);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 0.5cqh 0;
+}
+
+/* Diamonds, not dashes: a dash reads as a minus sign sitting beside a word,
+   which is the one thing a state marker must not look like. They take
+   currentColor, so they carry the state's colour without being told it. */
+.reel-item.is-committed::before,
+.reel-item.is-committed::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0.72cqh;
+  height: 0.72cqh;
+  min-width: 6px;
+  min-height: 6px;
+  background: currentColor;
+  transform: translateY(-50%) rotate(45deg);
+}
+.reel-item.is-committed::before { left: 0.9cqh; }
+.reel-item.is-committed::after  { right: 0.9cqh; }
+
+/* Keyed off the HUD ROOT, not the combat card: the drum is not the card's
+   child, so `.state-ATTACK .reel-item` would never match. */
+.hud[data-state="ATTACK"] .reel-item.is-committed { color: var(--red);
+  text-shadow: 0 0 2.8cqh rgb(var(--red-rgb) / 0.6);
+  border-color: rgb(var(--red-rgb) / 0.7); }
+.hud[data-state="GROUND"] .reel-item.is-committed { color: var(--red-text);
+  text-shadow: 0 0 2.8cqh rgb(var(--red-rgb) / 0.5);
+  border-color: rgb(var(--red-rgb) / 0.6); }
+
+.pulse-chip {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--red-text);
+  border: 1px solid rgb(var(--red-rgb) / 0.5);
+  padding: 0.22cqh 0.6cqh;
+  opacity: 0;
+  transition: opacity var(--dur-state) var(--ease);
+}
+.pulse-chip.on { opacity: 1; }
+
+/* Pills */
+.pills { display: flex; justify-content: center; gap: 0.5cqw; flex-wrap: wrap;
+         margin-top: 0.9cqh; }
+.pill {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  color: var(--ink-mid);
+  background: rgb(0 0 0 / 0.34);
+  border: 1px solid var(--line);
+  padding: 0.4cqh 0.9cqh;
+  white-space: nowrap;
+  transition: color var(--dur-state) var(--ease),
+              border-color var(--dur-state) var(--ease);
+}
+.pill b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pill.hot { border-color: rgb(var(--red-rgb) / 0.5); color: var(--red-text); }
+.pill.hot b { color: var(--red-text); }
+
+/* ── Bottom rail ─────────────────────────────────────────────────────────── */
+.strip {
+  grid-area: strip;
+  display: flex;
+  gap: 1.6cqw;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  color: var(--ink-mid);
+  padding: 0.55cqh 1.2cqh;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  pointer-events: none;
+}
+.strip span b { color: var(--ink); font-weight: 600; }
+
+/* ── Dev harness — not part of the design ────────────────────────────────── */
+.harness {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 100;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-dim);
+  background: rgb(4 5 10 / 0.94);
+  border: 1px solid var(--line);
+  padding: 8px 11px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  opacity: 0.16;
+  transition: opacity var(--dur-ui) var(--ease);
+}
+.harness:hover { opacity: 1; }
+.harness button {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 4px 9px;
+  cursor: pointer;
+}
+.harness button:hover { background: rgb(255 255 255 / 0.12); }
+.harness .sep { color: var(--line); }
+@media (max-width: 620px) { .harness { right: 8px; bottom: 8px; } }
+
+/* ── Responsive ──────────────────────────────────────────────────────────────
+   The columns collapse toward the CENTRE, not toward the left. The feed window
+   and the state instruments under it are the irreducible pair — everything
+   else is evidence for a claim you can no longer see if the feed goes. */
+@container viewport (max-width: 900px) {
+  .hud {
+    grid-template-columns: minmax(0, 27cqw) minmax(0, 1fr);
+    grid-template-areas:
+      "topbar topbar"
+      "left   mid"
+      "strip  strip";
+    gap: 1cqh 1.1cqw;
+    --pad-x: 1.4cqw;
+  }
+  /* v6 dropped the whole right column here. v7 CANNOT: the throw alert lives
+     in it, and hiding the loudest element in the system to save 200px is the
+     wrong trade. The column stays and the roster sheds its last rows instead. */
+  .athlete .row:nth-child(n + 5) { display: none; }
+  .meter-head .w { display: none; }
+  .chip { font-size: max(7px, 1.15cqh); letter-spacing: 0.08em; }
+  .topbar .tb-seg:nth-child(n + 6) { display: none; }
+  .strip span:nth-child(n + 6) { display: none; }
+}
+
+@container viewport (max-width: 560px) {
+  .hud {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "topbar"
+      "mid"
+      "strip";
+  }
+  /* One column. The roster goes; the throw slot inside its column does not,
+     so the alert still arrives — it just arrives under the feed instead of
+     beside it. */
+  .col-left { display: none; }
+  #cardRoster { display: none; }
+  /* Two rows of four rather than eight cramped chips on one line. */
+  .chip { flex: 1 1 22%; }
+  .strip { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>magi — dashboard + system</title>
+<link rel="stylesheet" href="hud.css">
+<link rel="stylesheet" href="app.css">
+<style>
+  /* sync_app.sh embed — the iframe is the stage, so the frame fills it. */
+  html, body { overflow: hidden; }
+  .stage { padding: 10px; }
+  .app-frame { --avail-w: calc(100vw - 20px); --avail-h: calc(100vh - 20px); }
+</style>
+</head>
+<body>
+
+<!-- v8: the HUD is one view of an application, not the application. The tab
+     rail switches between the dashboard (review) and the system (capture).
+     Both are the SAME engine: hud.js runs the loop, and the dashboard reads
+     its state through window.MAGI rather than carrying numbers of its own. -->
+<div class="stage">
+  <div class="app-frame">
+
+
+    <div class="app-views">
+    <div class="viewport app-view" id="viewDash" data-view="dashboard">
+      <div class="hud">
+
+        <header class="topbar">
+          <span class="brand"><span class="lockup" aria-hidden="true"></span></span>
+          <span class="bar-thesis" aria-hidden="true">
+            <span class="tab-slashes">///</span>
+            <span class="tab-thesis">Grappling Software providing machine verification of human energy.</span>
+          </span>
+          <span class="forged-mark forged-top" aria-hidden="true">FORGED BY SZ LABS</span>
+        </header>
+        <nav class="app-tabs" role="tablist" aria-label="magi views">
+          <button class="app-tab tab-dash is-active" type="button" role="tab"
+                  aria-selected="true" aria-controls="viewDash">
+            <span class="tab-dot" aria-hidden="true"></span>
+            <span class="wm" aria-hidden="true"></span><span>dashboard</span>
+          </button>
+          <button class="app-tab tab-sys" type="button" role="tab"
+                  aria-selected="false" aria-controls="viewport">
+            <span class="tab-dot" aria-hidden="true"></span>
+            <span class="wm" aria-hidden="true"></span><span>system</span>
+          </button>
+          <span class="rail-info">
+            <span class="tb-rule" aria-hidden="true">///</span>
+            <span class="tb-seg"><i>ATHLETE</i><b>gpug</b></span>
+            <span class="tb-seg"><i>SESSIONS</i><b id="dSessions">0</b></span>
+            <span class="tb-seg"><i>THROWS</i><b id="dThrows">0</b></span>
+            <span class="tb-seg"><i>LAST</i><b id="dLast">&mdash;</b></span>
+            <span class="ascii" data-ascii="bar" data-n="14" aria-hidden="true"></span>
+            <span class="tb-seg"><i>BUILD</i><b class="ok">v17</b></span>
+          </span>
+          <button class="app-btn app-btn-ghost btn-stop" type="button" hidden>stop &amp; review</button>
+        </nav>
+
+
+        <div class="col col-left">
+          <section class="panel notch-tr" id="pSessions">
+            <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodySessions">
+              <span class="panel-title">SESSIONS</span>
+              <span class="panel-key" aria-hidden="true">01</span>
+              <span class="panel-toggle" aria-hidden="true"></span>
+            </button>
+            <div class="panel-body" id="bodySessions">
+              <p class="null-line">no sessions recorded</p>
+            </div>
+          </section>
+
+          <section class="panel" id="pTotals">
+            <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodyTotals">
+              <span class="panel-title">TOTALS</span>
+              <span class="panel-key" aria-hidden="true">02</span>
+              <span class="panel-toggle" aria-hidden="true"></span>
+            </button>
+            <div class="panel-body" id="bodyTotals">
+              <div class="row"><span class="k">throws</span><span class="v" id="tThrows">&mdash;</span></div>
+              <div class="row"><span class="k">state changes</span><span class="v" id="tTrans">&mdash;</span></div>
+              <div class="row"><span class="k">frames</span><span class="v" id="tFrames">&mdash;</span></div>
+              <div class="row"><span class="k">mat time</span><span class="v" id="tTime">&mdash;</span></div>
+              <div class="row"><span class="k">uke bound</span><span class="v" id="tUke">&mdash;</span></div>
+            </div>
+          </section>
+
+          <section class="panel rail-card" id="pStatus">
+            <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodyStatusDash">
+              <span class="panel-title">STATUS</span>
+              <span class="panel-key" aria-hidden="true">03</span>
+              <span class="panel-toggle" aria-hidden="true"></span>
+            </button>
+            <div class="panel-body" id="bodyStatusDash">
+              <div class="row"><span class="k">review</span><span class="v" id="dReview">&mdash;</span></div>
+              <div class="row"><span class="k">highlights</span><span class="v" id="dCount">0</span></div>
+              <div class="row"><span class="k">source</span><span class="v" id="dSource">live engine</span></div>
+              <div class="row"><span class="k">export</span><span class="v">mp4 &middot; csv</span></div>
+              <div class="row"><span class="k">state</span><span class="v" id="dState">EMPTY</span></div>
+              <span class="ascii dim" data-ascii="bar" data-n="14" aria-hidden="true"></span>
+            </div>
+          </section>
+        </div>
+
+        <div class="col col-mid">
+          <div class="feed-window" id="dashWindow">
+            <video id="reviewVideo" class="review-video" muted playsinline preload="metadata"
+                   src="../assets/video/throw_asset_no_bg.mp4"></video>
+            <span class="rec-overlay" hidden><span class="tab-rec-dot" aria-hidden="true"></span>REC</span>
+            <div class="dash-empty" id="dashEmpty">
+              <p>Looks like you haven&rsquo;t recorded a session yet.<br>
+                 Start recording in the <span class="wm" aria-label="magi"></span> system
+                 then review your highlights here.</p>
+              <button class="app-btn" id="btnStart" type="button">start recording</button>
+            </div>
+
+            <div class="dash-load" id="dashLoad" hidden>
+              <span class="load-ring" aria-hidden="true"></span>
+              <span class="load-word">AGGREGATING MATCH DATA</span>
+              <span class="load-sub" id="loadSub">reading clips &middot; 0%</span>
+            </div>
+
+          </div>
+
+          <div class="hl-list" id="hlList" hidden></div>
+
+          <div class="dash-rail" id="dashRail" hidden>
+            <button class="app-btn" id="btnNew" type="button">record new session</button>
+          </div>
+        </div>
+
+        <div class="col col-right">
+          <section class="panel" id="pRoster">
+            <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodyRosterDash">
+              <span class="panel-title">COMPETITORS</span>
+              <span class="panel-key" aria-hidden="true">04</span>
+              <span class="panel-toggle" aria-hidden="true"></span>
+            </button>
+            <div class="panel-body" id="bodyRosterDash">
+              <div class="athlete">
+                <div class="athlete-head">
+                  <span class="slot-badge">P0</span>
+                  <input class="athlete-input" id="nameInputA" type="text" value="LEO"
+                         aria-label="Competitor P0 name" maxlength="14" spellcheck="false">
+                </div>
+                <div class="row"><span class="k">track</span><span class="v">#3</span></div>
+                <div class="row"><span class="k">throws</span><span class="v" id="rThrowsA">&mdash;</span></div>
+                <div class="row"><span class="k">best score</span><span class="v" id="rBestA">&mdash;</span></div>
+                <div class="row"><span class="k">bound</span><span class="v" id="rBoundA">&mdash;</span></div>
+              </div>
+              <div class="athlete">
+                <div class="athlete-head">
+                  <span class="slot-badge">P1</span>
+                  <input class="athlete-input" id="nameInputB" type="text" value="BEN"
+                         aria-label="Competitor P1 name" maxlength="14" spellcheck="false">
+                </div>
+                <div class="row"><span class="k">track</span><span class="v">#7</span></div>
+                <div class="row"><span class="k">throws</span><span class="v" id="rThrowsB">&mdash;</span></div>
+                <div class="row"><span class="k">best score</span><span class="v" id="rBestB">&mdash;</span></div>
+                <div class="row"><span class="k">bound</span><span class="v" id="rBoundB">&mdash;</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" id="pPeaks">
+            <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodyPeaks">
+              <span class="panel-title">SIGNAL PEAKS</span>
+              <span class="panel-key" aria-hidden="true">05</span>
+              <span class="panel-toggle" aria-hidden="true"></span>
+            </button>
+            <div class="panel-body" id="bodyPeaks">
+              <p class="null-line">no signal history</p>
+            </div>
+          </section>
+
+          <section class="panel" id="pThrow">
+            <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodyPick">
+              <span class="panel-title">SELECTED THROW</span>
+              <span class="panel-key" aria-hidden="true">06</span>
+              <span class="panel-toggle" aria-hidden="true"></span>
+            </button>
+            <div class="panel-body" id="bodyPick">
+              <p class="null-line">nothing selected</p>
+            </div>
+          </section>
+        </div>
+
+
+      </div>
+    </div>
+  <div class="viewport app-view is-inactive" id="viewport" data-view="system">
+
+    <!-- ── HUD ───────────────────────────────────────────────────────────────
+         v6: the HUD is the LAYOUT, not an overlay. v1-v5 floated glass cards
+         on top of a full-bleed feed; here the chrome sits on solid ground and
+         the feed is given its own window in the centre column. -->
+    <div class="hud" id="hud">
+
+      <!-- TOP BAR — the Magi wordmark plus session identity. -->
+      <header class="topbar">
+        <span class="brand"><span class="lockup" aria-hidden="true"></span></span>
+        <span class="bar-thesis" aria-hidden="true">
+            <span class="tab-slashes">///</span>
+            <span class="tab-thesis">Grappling Software providing machine verification of human energy.</span>
+          </span>
+        <span class="forged-mark forged-top" aria-hidden="true">FORGED BY SZ LABS</span>
+      </header>
+        <nav class="app-tabs" role="tablist" aria-label="magi views">
+          <button class="app-tab tab-dash is-active" type="button" role="tab"
+                  aria-selected="true" aria-controls="viewDash">
+            <span class="tab-dot" aria-hidden="true"></span>
+            <span class="wm" aria-hidden="true"></span><span>dashboard</span>
+          </button>
+          <button class="app-tab tab-sys" type="button" role="tab"
+                  aria-selected="false" aria-controls="viewport">
+            <span class="tab-dot" aria-hidden="true"></span>
+            <span class="wm" aria-hidden="true"></span><span>system</span>
+          </button>
+          <span class="rail-info">
+            <span class="tb-rule" aria-hidden="true">///</span>
+            <span class="tb-seg"><i>SESSION</i><b id="vSession">—</b></span>
+            <span class="tb-seg"><i>PLAN</i><b id="vPlan">—</b></span>
+            <span class="tb-seg"><i>PROFILE</i><b id="vProfile">—</b></span>
+            <span class="tb-seg"><i>CONSENT</i><b id="vConsent" class="ok">—</b></span>
+            <span class="tb-seg"><i>PWR</i><b id="vPower">—</b></span>
+            <span class="ascii" data-ascii="bar" data-n="14" aria-hidden="true"></span>
+            <span class="tb-seg"><i>T+</i><b id="vElapsed">—</b></span>
+          </span>
+          <button class="app-btn app-btn-ghost btn-stop" type="button" hidden>stop &amp; review</button>
+        </nav>
+
+
+      <!-- LEFT COLUMN -->
+      <div class="col col-left">
+
+
+        <section class="panel notch-bl" id="cardAnalysis">
+          <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodyAnalysis">
+            <span class="panel-title">COMBAT ANALYSIS</span>
+            <span class="panel-key" aria-hidden="true">01</span>
+            <span class="panel-toggle" aria-hidden="true"></span>
+          </button>
+          <div class="panel-body" id="bodyAnalysis">
+            <div class="meter" data-sig="engagement">
+              <div class="meter-head"><span>ENGAGEMENT <i class="w">×0.12</i></span><span class="val">0%</span></div>
+              <div class="meter-track"><div class="meter-fill"></div></div>
+            </div>
+            <div class="meter" data-sig="entry">
+              <div class="meter-head"><span>ENTRY <i class="w">×0.15</i></span><span class="val">0%</span></div>
+              <div class="meter-track"><div class="meter-fill"></div></div>
+            </div>
+            <div class="meter" data-sig="best_entry_signal">
+              <div class="meter-head"><span>BEST ENTRY <i class="w">×0.23</i></span><span class="val">0%</span></div>
+              <div class="meter-track"><div class="meter-fill"></div></div>
+            </div>
+            <div class="meter" data-sig="knee_asymmetry">
+              <div class="meter-head"><span>KNEE ASYM <i class="w">×0.05</i></span><span class="val">0%</span></div>
+              <div class="meter-track"><div class="meter-fill"></div></div>
+            </div>
+            <div class="meter" data-sig="support_loss">
+              <div class="meter-head"><span>SUPPORT LOSS <i class="w">×0.25</i></span><span class="val">0%</span></div>
+              <div class="meter-track"><div class="meter-fill"></div></div>
+            </div>
+            <div class="meter" data-sig="descent">
+              <div class="meter-head"><span>DESCENT <i class="w">×0.20</i></span><span class="val">0%</span></div>
+              <div class="meter-track"><div class="meter-fill"></div></div>
+            </div>
+            <span class="ascii dim" data-ascii="bin" data-n="4" aria-hidden="true"></span>
+          </div>
+        </section>
+
+        <section class="panel rail-card" id="cardPair">
+          <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodyPair">
+            <span class="panel-title">PAIR METRICS</span>
+            <span class="panel-key" aria-hidden="true">02</span>
+            <span class="panel-toggle" aria-hidden="true"></span>
+          </button>
+          <div class="panel-body" id="bodyPair">
+            <div class="row"><span class="k">pair</span><span class="v" id="sPair">—</span></div>
+            <div class="row"><span class="k">heading</span><span class="v" id="sHeading">—</span></div>
+            <div class="row"><span class="k">engage</span><span class="v" id="sEngage">—</span></div>
+            <div class="row"><span class="k">stance</span><span class="v" id="sStance">—</span></div>
+            <div class="row"><span class="k">grip</span><span class="v" id="sGrip">—</span></div>
+            <div class="row"><span class="k">binder</span><span class="v" id="sBinder">—</span></div>
+            <div class="row"><span class="k">uke bound</span><span class="v" id="sUke">—</span></div>
+            <span class="ascii dim" data-ascii="bar" data-n="14" aria-hidden="true"></span>
+          </div>
+        </section>
+      </div>
+
+      <!-- ── CENTRE COLUMN — the feed window, then the state instruments ──────
+           The feed is no longer the page background. It is a framed window
+           with its own rim and reticles, and the chrome sits beside it on
+           solid ground rather than floating on the mat. -->
+      <div class="col col-mid">
+
+        <div class="feed-window" id="feedWindow">
+          <span class="rec-overlay" hidden><span class="tab-rec-dot" aria-hidden="true"></span>REC</span>
+          <div class="feed-cta" id="feedCta">
+            <button class="app-btn" id="btnStartFeed" type="button">start recording</button>
+          </div>
+          <!-- Feed. Recorded session footage stands in for the live camera:
+               this prototype never opens a capture device. -->
+          <video id="feed" autoplay muted loop playsinline
+                 src="../assets/video/throw_asset_no_bg.mp4"></video>
+          <div class="feed-fallback" id="feedFallback" hidden>
+            NO FEED SOURCE<br>
+            <small>serve from the repo root — see README.md</small>
+          </div>
+
+          <div class="feed-grade"></div>
+
+          <!-- Registration marks, now on the window rather than the page. -->
+          <div class="reticles" aria-hidden="true">
+            <span class="reticle tl"></span><span class="reticle tr"></span>
+            <span class="reticle bl"></span><span class="reticle br"></span>
+            <span class="ajam a1"></span><span class="ajam a2"></span>
+          </div>
+
+        </div>
+
+        <!-- COMBAT STATE — the committed word, on its own bar under the feed.
+             Clicking it collapses the raw ribbon below; the bar itself never
+             goes away, so shutting the drawer never hides the claim. -->
+        <section class="c-combat state-OPEN" id="cardCombat">
+          <button class="reel-head" type="button" id="reelToggle"
+                  aria-expanded="true" aria-controls="ribbonBody">
+            <span class="brand-mark sm" aria-hidden="true"></span>
+            <span class="reel-label">COMBAT STATE</span>
+            <span class="reel-now" id="reelNow">OPEN</span>
+            <span class="pulse-chip" id="pulseChip">LEVEL CHANGE</span>
+            <span class="ascii dim" data-ascii="bar" data-n="12" aria-hidden="true"></span>
+            <span class="panel-toggle" aria-hidden="true"></span>
+          </button>
+
+          <!-- The drawer: the drum, then the RAW detector stream beneath it.
+               v6 put the drum inside the throw card, which meant the salience
+               ramp was only on screen during a throw. Here it is permanent and
+               it is OFF the mat — the two things the middle of the frame could
+               not give it at once.
+
+               The ribbon is populated from RAW_STATES in hud.js, which is the
+               same key set as display_state.DISPLAY_WORD — see the note there. -->
+          <div class="ribbon-body" id="ribbonBody">
+            <!-- ONE grid child. The `0fr -> 1fr` collapse animates a single
+                 row; a second child lands in an implicit auto row and the
+                 sized one gets squeezed, which silently cropped the drum's
+                 far slot. Everything the drawer holds goes in here. -->
+            <div class="drawer-inner">
+            <div class="reel-drum">
+              <div class="reel" id="reel">
+                <div class="reel-track" id="reelTrack">
+                  <div class="reel-item" data-state="OPEN">OPEN</div>
+                  <div class="reel-item" data-state="ENGAGED">ENGAGED</div>
+                  <div class="reel-item" data-state="ATTACK">ATTACK</div>
+                  <div class="reel-item" data-state="GROUND">GROUND</div>
+                  <div class="reel-item" data-state="RECOVERY">RECOVERY</div>
+                </div>
+              </div>
+            </div>
+            <div class="ribbon" id="ribbon"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="col col-right">
+        <section class="panel notch-bl" id="cardRoster">
+          <button class="panel-head" type="button" aria-expanded="true" aria-controls="bodyRoster">
+            <span class="panel-title">COMPETITORS</span>
+            <span class="panel-key" aria-hidden="true">03</span>
+            <span class="panel-toggle" aria-hidden="true"></span>
+          </button>
+          <div class="panel-body" id="bodyRoster">
+
+            <div class="athlete role-tori" id="athA">
+              <div class="athlete-head">
+                <span class="slot-badge">P0</span>
+                <span class="athlete-name" id="nameA">LEO</span>
+                <span class="athlete-role" id="roleA">TORI</span>
+              </div>
+              <div class="row"><span class="k">track</span>    <span class="v" id="aTrack">—</span></div>
+              <div class="row"><span class="k">bind</span>     <span class="v bind bound" id="aBind">—</span></div>
+              <div class="row"><span class="k">support</span>  <span class="v" id="aSupport">—</span></div>
+              <div class="row"><span class="k">off-bal</span>  <span class="v" id="aBal">—</span></div>
+              <div class="row"><span class="k">L / R knee</span> <span class="v" id="aKnee">—</span></div>
+              <div class="row"><span class="k">L / R elbow</span><span class="v" id="aElbow">—</span></div>
+              <div class="row"><span class="k">head</span>     <span class="v" id="aHead">—</span></div>
+            </div>
+
+            <div class="athlete role-uke" id="athB">
+              <div class="athlete-head">
+                <span class="slot-badge">P1</span>
+                <span class="athlete-name" id="nameB">BEN</span>
+                <span class="athlete-role" id="roleB">UKE</span>
+              </div>
+              <div class="row"><span class="k">track</span>    <span class="v" id="bTrack">—</span></div>
+              <div class="row"><span class="k">bind</span>     <span class="v bind bound" id="bBind">—</span></div>
+              <div class="row"><span class="k">support</span>  <span class="v" id="bSupport">—</span></div>
+              <div class="row"><span class="k">off-bal</span>  <span class="v" id="bBal">—</span></div>
+              <div class="row"><span class="k">L / R knee</span> <span class="v" id="bKnee">—</span></div>
+              <div class="row"><span class="k">L / R elbow</span><span class="v" id="bElbow">—</span></div>
+              <div class="row"><span class="k">head</span>     <span class="v" id="bHead">—</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── THROW DETECTED — under the roster it is about ──────────────────
+             v4 fired this into open frame and tethered it back to the tori
+             row with a leader line. v6 centred it on the mat and dropped the
+             tether. v7 stops needing one: the alert sits directly beneath the
+             two competitors, so the thing making the claim and the people it
+             is about share a column.
+
+             It also leaves the feed completely clear. Nothing is laid over
+             the footage in v7 — see the audit note in README.
+
+             THE PANEL IS PERMANENT. It does not appear and vanish: an alert
+             slot that is only there sometimes is one the operator has to find
+             under pressure, and its stats — score, roles, entry type — are
+             worth reading before a throw as well as during one. What changes
+             is the CONTENT: an empty state at rest, the asset and a live claim
+             during a throw. The panel itself never moves.
+
+             SCAFFOLDING FOR ASSET UPDATES — unchanged from v5/v6:
+               data-anim  folder under assets/ to play
+               data-fps   playback rate
+               data-hold  frame the reveal settles on
+               --crop-*   the content band inside the authoring canvas -->
+        <div class="throw-slot" id="throwSlot"
+             data-anim="throw_detected" data-fps="24" data-hold="45">
+          <div class="throw-inner">
+            <section class="panel notch-tr throw-card" id="cardThrow">
+              <button class="panel-head" type="button"
+                      aria-expanded="true" aria-controls="bodyThrow">
+                <span class="throw-dot" aria-hidden="true"></span>
+                <span class="panel-title">THROW</span>
+                <span class="panel-key" aria-hidden="true">04</span>
+                <span class="panel-toggle" aria-hidden="true"></span>
+              </button>
+              <div class="panel-body" id="bodyThrow">
+              <!-- The asset IS the title of the ALERT: it animates its own
+                   wordmark in. At rest there is no alert and no wordmark, so
+                   the slot says so in the system's own language for an absent
+                   claim — a dash, not a blank. -->
+              <div class="throw-anim" id="throwAnim">
+                <img id="throwFrame" alt="">
+                <div class="throw-empty" aria-hidden="true">— NO THROW —</div>
+              </div>
+              <div class="throw-body">
+                <div class="throw-meta">
+                  <span class="throw-key">THROW</span>
+                  <span id="throwEntry">—</span>
+                  <span class="ascii" data-ascii="scan" data-n="8" aria-hidden="true"></span>
+                  <span class="throw-note" id="throwNote">—</span>
+                </div>
+                <div class="pills">
+                  <span class="pill" id="pillScore">SCORE <b>0%</b></span>
+                  <span class="pill" id="pillAtk">ATK <b>?</b></span>
+                  <span class="pill" id="pillRcv">RCV <b>?</b></span>
+                  <span class="pill" id="pillEntry">ENTRY <b>—</b></span>
+                </div>
+              </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+    
+        <div class="strip live-strip">
+          <span class="rec-dot" aria-hidden="true"></span>
+          <span class="live-word" id="statusWord">LIVE</span>
+          <span>fps <b id="vFps">&mdash;</b></span>
+          <span>persons <b id="vPersons">&mdash;</b></span>
+          <span>frames <b id="vFrames">&mdash;</b></span>
+          <span>both vis <b id="vBoth">&mdash;</b></span>
+          <span>stable run <b id="vStable">&mdash;</b></span>
+          <span>swaps <b id="vSwaps">&mdash;</b></span>
+          <span>cpu <b id="vCpu">&mdash;</b></span>
+          <span class="ascii dim" data-ascii="scan" data-n="14" aria-hidden="true"></span>
+        </div>
+      </div>
+  </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- preview harness removed by sync_app.sh -->
+<script src="hud.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
