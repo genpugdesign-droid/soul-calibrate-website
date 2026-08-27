@@ -112,7 +112,13 @@ a { color: inherit; }
 /* ---------- hero ---------- */
 .hero {
   position: relative;
+  /* 100vh is the LARGE viewport on mobile — the height with the URL bar hidden
+     — so anything anchored to the hero's bottom starts below the fold and only
+     appears after a scroll. svh is the small viewport: the height actually on
+     screen at load, which is where "learn more" and the attribution belong.
+     The vh line stays first as the fallback for browsers without svh. */
   min-height: 100vh;
+  min-height: 100svh;
   overflow: hidden;
   text-align: left;
   background: var(--bg);
@@ -224,7 +230,7 @@ a { color: inherit; }
   position: absolute;
   left: clamp(20px, 4vw, 64px);
   right: clamp(20px, 4vw, 64px);
-  bottom: clamp(24px, 5vh, 64px);
+  bottom: calc(clamp(24px, 5vh, 64px) + env(safe-area-inset-bottom, 0px));
   z-index: 2;
   display: flex;
   align-items: center;
@@ -541,6 +547,9 @@ a { color: inherit; }
 
 /* guarantees the clearance above the dojos section in every layout mode */
 .card-slot:last-child .deck-card { margin-bottom: 24px; }
+/* and never less than 10px once the deck stacks and the slots lose their
+   generous desktop padding */
+.deck-section { padding-bottom: 10px; }
 
 .deck-card {
   position: sticky;
@@ -1821,4 +1830,28 @@ code,
 @keyframes uchi-hold {
   0%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   100%    { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ── touch: blending is not reliable here ─────────────────────────────────────
+   WebKit drops mix-blend-mode in several compositing situations — notably an
+   element inside a position:fixed ancestor, which is exactly what the deck's
+   video becomes on mobile. The blend silently paints nothing, which is why the
+   throw was missing on phones while working on desktop.
+
+   Both clips are keyed the same way: their ground is crushed to black and the
+   blend makes black contribute nothing. Without the blend the ground is still
+   black, and this page's own ground is #030304 — so dropping the blend and
+   leaning on contrast alone costs almost nothing visually and actually renders. */
+@media (hover: none) {
+  .bg-video {
+    mix-blend-mode: normal;
+    background: transparent;
+  }
+
+  .hero-mark {
+    mix-blend-mode: normal;
+    /* harder crush, since black is now hiding the ground rather than the blend */
+    filter: invert(1) hue-rotate(180deg) contrast(2.4) brightness(1.12) saturate(1.08);
+    background: transparent;
+  }
 }
