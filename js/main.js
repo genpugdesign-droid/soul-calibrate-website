@@ -406,3 +406,71 @@ if (deckToggle) {
     wrap.classList.remove('is-tracking');
   }, { passive: true });
 })();
+
+// ---------- touch: paint the clip through a canvas ----------
+// Neither priming the decode nor dropping the blend made the throw appear on
+// phones. Compositing a video inside a fixed, blended, filtered stack is the
+// fragile part, so on touch the video stops painting and its frames are copied
+// into a canvas: ordinary pixels, no blend mode, no compositing path to fall
+// through.
+//
+// The video element stays in the DOM at opacity 0 rather than display:none — a
+// video that is not rendered may stop decoding, and then there is no frame to
+// copy.
+(function canvasBackdrop() {
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  const wrap = document.getElementById('video-bg-wrap');
+  const canvas = document.getElementById('bg-canvas');
+  const source = document.getElementById('bg-video');
+  if (!wrap || !canvas || !source) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  wrap.classList.add('is-canvas');
+
+  const OPACITY = 0.55;   // matches what .bg-video carried on mobile
+
+  function size() {
+    const r = wrap.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    // cap the ratio: a 3x buffer on a full-screen backdrop costs more than it shows
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.round(r.width * dpr);
+    const h = Math.round(r.height * dpr);
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    draw();
+  }
+
+  function draw() {
+    const vw = source.videoWidth;
+    const vh = source.videoHeight;
+    if (!vw || !vh || source.readyState < 2) return;   // nothing decoded to copy yet
+
+    const cw = canvas.width;
+    const ch = canvas.height;
+    ctx.clearRect(0, 0, cw, ch);
+
+    // `contain`, matching how the video was fitted on mobile
+    const scale = Math.min(cw / vw, ch / vh);
+    const w = vw * scale;
+    const h = vh * scale;
+    ctx.globalAlpha = OPACITY;
+    try {
+      ctx.drawImage(source, (cw - w) / 2, (ch - h) / 2, w, h);
+    } catch (e) {
+      /* frame not ready; the next seek repaints */
+    }
+  }
+
+  // every scrub ends in a seek, so that is the repaint signal
+  source.addEventListener('seeked', draw);
+  source.addEventListener('loadeddata', size);
+  source.addEventListener('timeupdate', draw);
+  window.addEventListener('resize', size, { passive: true });
+
+  size();
+})();

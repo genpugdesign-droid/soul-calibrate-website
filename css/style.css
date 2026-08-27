@@ -1855,3 +1855,25 @@ code,
     background: transparent;
   }
 }
+
+/* ── touch: paint the clip through a canvas ───────────────────────────────────
+   Dropping the blend was not enough — the video still did not appear on phones.
+   Compositing a video inside a fixed, blended, filtered stack is the fragile
+   part, so on touch the frames are drawn into a canvas instead and the video
+   element stops painting entirely. A canvas is just pixels: no blend mode, no
+   compositing path to fall through.
+
+   The video stays in the DOM at opacity 0 rather than display:none, because a
+   video that is not rendered may stop decoding — and then there is no frame to
+   draw. */
+.bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  z-index: 2;
+  pointer-events: none;
+}
+.video-bg-wrap.is-canvas .bg-canvas { display: block; }
+.video-bg-wrap.is-canvas .bg-video { opacity: 0; }
