@@ -124,6 +124,33 @@ window.addEventListener('scroll', () => {
   }
 }, { passive: true });
 
+// Mobile browsers will not decode a video that has never played, so a clip
+// driven only by currentTime stays blank there — the deck's background was
+// missing on phones for exactly this reason. Muted inline playback is allowed
+// without a gesture, so the clip is played for one frame and paused again:
+// enough to force a decode, after which seeking paints like it does on desktop.
+// Some browsers still refuse before any interaction, so the first touch retries.
+(function primeVideoForTouch() {
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  let primed = false;
+  const kick = () => {
+    if (primed) return;
+    const playing = video.play();
+    if (playing && playing.then) {
+      playing.then(() => {
+        primed = true;
+        video.pause();
+        scrubVideo();          // paint the frame the current scroll position wants
+      }).catch(() => { /* refused until a gesture; the listener below retries */ });
+    }
+  };
+
+  kick();
+  video.addEventListener('loadedmetadata', kick);
+  document.addEventListener('touchstart', kick, { passive: true, once: true });
+})();
+
 // The clip never plays on its own at any size: scroll position is the only
 // thing that moves it, on mobile as well as desktop.
 video.loop = false;
