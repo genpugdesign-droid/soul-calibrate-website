@@ -417,16 +417,82 @@ if (deckToggle) {
 // from its own brightness, which makes black genuinely transparent rather than
 // asking a blend mode to hide it. That is plain pixel data, so nothing depends
 // on a compositing path.
+// The desktop lockup is knocked out by a CSS filter chain whose order is
+// load-bearing (see .hero-mark in style.css):
+//
+//     invert(1) hue-rotate(180deg) contrast(1.42) brightness(1.22) saturate(1.12)
+//
+// The canvas path used to run only the invert, and that is exactly why the mark
+// came out sepia on phones: invert() flips HUE as well as lightness, so without
+// the half-turn back the cool metal lands on the opposite side of the wheel.
+// These rebuild the same transform in pixels so the two paths agree.
+//
+// hue-rotate and saturate are both 3x3 matrices in sRGB, so they multiply into
+// ONE matrix built once per renderer rather than per pixel. contrast and
+// brightness are scalars and fold straight through it: every row of the
+// saturate matrix sums to 1, so it passes contrast's constant term untouched.
+//
+//     out = A * (M . invert(v)) + B
+//     A = brightness * contrast
+//     B = brightness * 127.5 * (1 - contrast)
+function hueRotateMatrix(deg) {
+  const c = Math.cos(deg * Math.PI / 180);
+  const s = Math.sin(deg * Math.PI / 180);
+  return [
+    0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928,
+    0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.140, 0.072 - c * 0.072 - s * 0.283,
+    0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072
+  ];
+}
+
+function saturateMatrix(k) {
+  return [
+    0.213 + 0.787 * k, 0.715 - 0.715 * k, 0.072 - 0.072 * k,
+    0.213 - 0.213 * k, 0.715 + 0.285 * k, 0.072 - 0.072 * k,
+    0.213 - 0.213 * k, 0.715 - 0.715 * k, 0.072 + 0.928 * k
+  ];
+}
+
+function multiply3(a, b) {
+  const out = new Array(9);
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      out[r * 3 + c] = a[r * 3] * b[c] + a[r * 3 + 1] * b[3 + c] + a[r * 3 + 2] * b[6 + c];
+    }
+  }
+  return out;
+}
+
 function keyedCanvas(source, canvas, opts) {
-  const settings = Object.assign(
-    { invert: false, alpha: 1, animate: false, fps: 15, fit: 'contain' }, opts);
+  const settings = Object.assign({
+    invert: false, alpha: 1, animate: false, fps: 15, fit: 'contain',
+    // The rest of the CSS filter chain, matched per caller. Identity by
+    // default, so a caller with no filter to mirror pays one multiply-add per
+    // channel and nothing changes.
+    hueRotate: 0, contrast: 1, brightness: 1, saturate: 1,
+    // Brightness at which a pixel becomes FULLY opaque. 213 is what the old
+    // fixed gain of 1.35 worked out to.
+    knee: 213
+  }, opts);
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
   // The keying loop runs per pixel, so it works on a small buffer and the
   // result is scaled up. The clips are soft; the detail is not missed.
   const FLOOR = 24;   // brightness below this is ground, not mark
-  const GAIN = 1.35;  // and what survives is lifted back to full strength
+  // ...and KNEE is where what survives reaches full opacity. The ramp between
+  // the two is what decides whether a clip OCCLUDES what sits under it or lets
+  // it show through, which is a separate question from how bright the clip is:
+  // clipping ALPHA does not flatten anything, because the RGB is untouched and
+  // a fully opaque pixel still renders its own dark tone.
+  const KNEE = Math.max(FLOOR + 1, settings.knee);
+  const GAIN = 255 / (KNEE - FLOOR);
+
+  // hue-rotate and saturate folded into one matrix; contrast and brightness as
+  // the scalars that ride through it.
+  const M = multiply3(saturateMatrix(settings.saturate), hueRotateMatrix(settings.hueRotate));
+  const A = settings.brightness * settings.contrast;
+  const B = settings.brightness * 127.5 * (1 - settings.contrast);
 
   const work = document.createElement('canvas');
   const wctx = work.getContext('2d', { willReadFrequently: true });
@@ -447,13 +513,25 @@ function keyedCanvas(source, canvas, opts) {
     for (let i = 0; i < d.length; i += 4) {
       let r = d[i], g = d[i + 1], b = d[i + 2];
       if (settings.invert) { r = 255 - r; g = 255 - g; b = 255 - b; }
+
+      // the same colour the CSS filter chain produces on desktop
+      let nr = A * (M[0] * r + M[1] * g + M[2] * b) + B;
+      let ng = A * (M[3] * r + M[4] * g + M[5] * b) + B;
+      let nb = A * (M[6] * r + M[7] * g + M[8] * b) + B;
+      if (nr < 0) nr = 0; else if (nr > 255) nr = 255;
+      if (ng < 0) ng = 0; else if (ng > 255) ng = 255;
+      if (nb < 0) nb = 0; else if (nb > 255) nb = 255;
+
       // brightness becomes opacity: the ground falls away, the mark stays.
-      // The floor matters — an inverted grey ground lands around 18/255, which
-      // is not black but is still a visible haze once it covers a whole frame.
-      const lum = r > g ? (r > b ? r : b) : (g > b ? g : b);
+      // Measured on the FINAL colour, because that is what `screen` blends
+      // against on desktop — and contrast has already crushed the ground toward
+      // black by this point, which is what makes the floor hold. The floor
+      // matters: an inverted grey ground lands around 18/255, which is not
+      // black but is still a visible haze once it covers a whole frame.
+      const lum = nr > ng ? (nr > nb ? nr : nb) : (ng > nb ? ng : nb);
       let a = (lum - FLOOR) * GAIN;
       if (a < 0) a = 0; else if (a > 255) a = 255;
-      d[i] = r; d[i + 1] = g; d[i + 2] = b;
+      d[i] = nr; d[i + 1] = ng; d[i + 2] = nb;
       d[i + 3] = a;
     }
     wctx.putImageData(img, 0, 0);
@@ -523,9 +601,18 @@ function keyedCanvas(source, canvas, opts) {
   const isTouch = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   // The desktop panel is nearly square while the clip is 16:9, so `contain`
   // left it marooned in the middle at a fraction of the width.
+  // The throw is DARK footage — its figures sit at a median value of ~70/255 —
+  // so the default 213 knee painted them at about a third alpha and the ascii
+  // field read straight through the bodies. That is what kept the clip looking
+  // like it was UNDER the static even though its canvas paints above it: the
+  // stacking was never the problem, the transparency was. At 90 the figures
+  // occlude what is behind them while the ground and the soft halo around them
+  // stay keyed out, and the clip keeps its own tonality because only alpha is
+  // being clipped here, never colour.
   const renderer = keyedCanvas(source, canvas, {
     alpha: isTouch ? 0.55 : 1,
-    fit: isTouch ? 'contain' : 'cover'
+    fit: isTouch ? 'contain' : 'cover',
+    knee: 90
   });
   if (!renderer) return;
   wrap.classList.add('is-canvas');
@@ -534,7 +621,37 @@ function keyedCanvas(source, canvas, opts) {
     const r = wrap.getBoundingClientRect();
     if (r.width && r.height) renderer.resize(r.width, r.height);
   };
-  source.addEventListener('seeked', renderer.paint);
+  // A canvas only ever shows what it was last told to draw, and `seeked` is a
+  // poor clock to drive that from: while the page is scrolling, successive
+  // currentTime writes get coalesced into ONE pending seek, so the event fires
+  // a handful of times across a whole scroll rather than once per frame. The
+  // clip then holds a stale frame instead of running under the scrub.
+  //
+  // The <video> element this canvas replaced did not have the problem because
+  // it repainted itself on every decoded frame. Nothing here regressed when the
+  // canvas arrived — the stall was simply unreadable while the key still
+  // painted the throw at about a third alpha over a busy ascii field.
+  //
+  // So the repaint rides the frame clock while the deck is actually moving, and
+  // stops once it settles. A paint is well under a millisecond, which is cheap
+  // for the length of a scroll and nothing at all when the page is idle.
+  const TAIL = 400;   // keep painting this long after the last sign of movement
+  let lastMove = 0;
+  let pumping = false;
+
+  function pump() {
+    if (performance.now() - lastMove > TAIL) { pumping = false; return; }
+    renderer.paint();
+    requestAnimationFrame(pump);
+  }
+
+  function wake() {
+    lastMove = performance.now();
+    if (!pumping) { pumping = true; requestAnimationFrame(pump); }
+  }
+
+  source.addEventListener('seeked', wake);
+  window.addEventListener('scroll', wake, { passive: true });
   source.addEventListener('loadeddata', fit);
   source.addEventListener('canplay', fit);
   window.addEventListener('resize', fit, { passive: true });
@@ -565,7 +682,15 @@ function keyedCanvas(source, canvas, opts) {
   const canvas = document.getElementById('hero-mark-canvas');
   if (!stack || !source || !canvas) return;
 
-  const renderer = keyedCanvas(source, canvas, { invert: true, animate: true, fps: 15 });
+  // The whole of .hero-mark's filter chain, not just the invert. Running the
+  // invert alone is what desaturated the lockup on phones: invert() flips hue
+  // as well as lightness, so the blue metal came back around 13deg — orange —
+  // instead of the ~252deg the desktop path renders. Keep these in step with
+  // the `filter:` line on .hero-mark in style.css; they are the same numbers.
+  const renderer = keyedCanvas(source, canvas, {
+    invert: true, animate: true, fps: 15,
+    hueRotate: 180, contrast: 1.42, brightness: 1.22, saturate: 1.12
+  });
   if (!renderer) return;
   stack.classList.add('is-canvas');
 

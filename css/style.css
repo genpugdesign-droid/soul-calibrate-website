@@ -303,6 +303,8 @@ a { color: inherit; }
      contrast has already crushed the background to true black, and anything
      multiplied by zero stays zero, so lifting the metal cannot lift the
      background back into view. Put brightness first and the knockout breaks. */
+  /* Touch runs this same chain in pixels instead — see heroMark() in main.js.
+     Change one and change the other, or the phone drifts off colour again. */
   filter: invert(1) hue-rotate(180deg) contrast(1.42) brightness(1.22) saturate(1.12);
   mix-blend-mode: screen;
   transition: transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
