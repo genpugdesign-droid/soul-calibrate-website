@@ -615,11 +615,27 @@ function keyedCanvas(source, canvas, opts) {
     knee: 90
   });
   if (!renderer) return;
-  wrap.classList.add('is-canvas');
+
+  // Hand the panel over to the canvas only once there is actually a frame in
+  // it. `is-canvas` drops the <video> to opacity 0, so adding it up front means
+  // the panel shows the ascii field ALONE for as long as the clip takes to
+  // become decodable — the throw is not under the static there, it is absent.
+  // keyedCanvas() returns as soon as it has a 2d context, which says nothing
+  // about the video, and that gap is invisible on a machine that decodes in
+  // hardware and wide on one that does not.
+  let handedOver = false;
+  const paintNow = () => {
+    const ok = renderer.paint();
+    if (ok && !handedOver) {
+      handedOver = true;
+      wrap.classList.add('is-canvas');
+    }
+    return ok;
+  };
 
   const fit = () => {
     const r = wrap.getBoundingClientRect();
-    if (r.width && r.height) renderer.resize(r.width, r.height);
+    if (r.width && r.height) { renderer.resize(r.width, r.height); paintNow(); }
   };
   // A canvas only ever shows what it was last told to draw, and `seeked` is a
   // poor clock to drive that from: while the page is scrolling, successive
@@ -641,7 +657,7 @@ function keyedCanvas(source, canvas, opts) {
 
   function pump() {
     if (performance.now() - lastMove > TAIL) { pumping = false; return; }
-    renderer.paint();
+    paintNow();
     requestAnimationFrame(pump);
   }
 
@@ -662,7 +678,7 @@ function keyedCanvas(source, canvas, opts) {
   // the canvas would simply stay empty. Retry until one lands.
   let tries = 0;
   (function settle() {
-    if (renderer.paint() || tries++ > 12) return;
+    if (paintNow() || tries++ > 12) return;
     setTimeout(settle, 250);
   })();
 })();

@@ -104,8 +104,9 @@
       <video class="bg-video" id="bg-video" muted playsinline preload="auto">
         <source src="assets/video/throw_asset_no_bg.mp4" type="video/mp4">
       </video>
-      <!-- Touch only: the video element is painted into this canvas instead of
-           being composited itself. See canvasBackdrop() in main.js. -->
+      <!-- Every device: the video element is painted into this canvas instead
+           of being composited itself, because `screen` let the ascii field show
+           through the clip's dark areas. See deckBackdrop() in main.js. -->
       <canvas class="bg-canvas" id="bg-canvas" aria-hidden="true"></canvas>
       <button class="deck-toggle" id="deck-toggle" type="button" aria-expanded="true" aria-controls="cards-col">[ &raquo; ]</button>
       <div class="video-cursor" id="video-cursor" aria-hidden="true">UCHI-MATA!</div>
