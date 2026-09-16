@@ -848,6 +848,25 @@ a { color: inherit; }
   color: var(--text-dim);
 }
 
+.member-links {
+  display: flex;
+  gap: 10px;
+  margin: clamp(4px, 0.8vh, 8px) 0 0;
+}
+.member-links a {
+  display: inline-flex;
+  color: var(--blue-dim);
+  transition: color 0.15s;
+}
+.member-links a:hover,
+.member-links a:focus-visible { color: var(--blue); }
+.member-links svg {
+  width: clamp(14px, 1.8vh, 18px);
+  height: clamp(14px, 1.8vh, 18px);
+  fill: currentColor;
+}
+.member-links svg[fill="none"] { fill: none; }
+
 /* ---------- video caption + collapse tab ---------- */
 /* The label follows the cursor across the footage rather than sitting in a
    corner naming the athletes. Position is written by main.js on a rAF loop, so
