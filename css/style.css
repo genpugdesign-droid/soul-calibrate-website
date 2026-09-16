@@ -1692,41 +1692,25 @@ code,
   font-family: var(--font-mono);
 }
 
-/* ── demo embed ───────────────────────────────────────────────────────────────
-   The demo is no longer a mockup rebuilt in this stylesheet: it is the actual
-   magi build, embedded. The iframe keeps its hud.css/app.css out of this
-   document, so neither can style the other by accident. */
+/* ── demo video ───────────────────────────────────────────────────────────────
+   Footage of the build running on a monitor beside the mat, recorded with
+   the sound stripped. It scales with its column like any image. */
 .demo-frame {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9.6;
+  aspect-ratio: 16 / 9;
   border: 1px solid var(--border-strong);
   background: #04050a;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
   overflow: hidden;
 }
-.demo-frame iframe {
-  position: absolute;
-  inset: 0;
+.demo-video {
+  display: block;
   width: 100%;
   height: 100%;
-  border: 0;
-  display: block;
+  object-fit: cover;
 }
 
-.demo-note {
-  margin: 12px 0 0;
-  font-size: 0.8rem;
-  color: var(--text-dim);
-}
-.demo-note a { color: var(--blue); text-decoration: none; border-bottom: 1px solid var(--blue-dim); }
-.demo-note a:hover { color: var(--text); }
-
-@media (max-width: 860px) {
-  /* Below the HUD's own breakpoint the embed would render its mobile layout in
-     a letterbox; give it more height instead of squeezing it. */
-  .demo-frame { aspect-ratio: 4 / 5; }
-}
 
 /* ── header lockup + mobile menu ───────────────────────────────────────────── */
 .logo { display: inline-flex; align-items: center; }
@@ -1756,31 +1740,6 @@ code,
 .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
 
-/* ── demo embed: scale, never reflow ───────────────────────────────────────── */
-/* The iframe renders at a fixed logical width and is scaled to fit. Letting it
-   narrow instead would trip the HUD's own 860px breakpoint and swap in its
-   mobile layout — the demo should shrink with the window, not become a
-   different interface. Height is set by main.js from the same scale. */
-.demo-frame {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  aspect-ratio: auto;
-  border: 1px solid var(--border-strong);
-  background: #04050a;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-}
-.demo-frame iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1440px;
-  height: 900px;
-  border: 0;
-  display: block;
-  transform-origin: top left;
-}
-
 @media (max-width: 860px) {
   /* the lockup stays; the links fold into the menu */
   .nav-toggle { display: flex; }
@@ -1801,9 +1760,6 @@ code,
   .site-nav.is-open { display: flex; }
   .site-nav a { padding: 12px 20px; font-size: 13px; }
   .site-nav a + a { border-top: 1px solid var(--border); }
-
-  /* the embed keeps its desktop layout, just smaller */
-  .demo-frame { aspect-ratio: auto; }
 }
 
 /* ── UCHI-MATA! on touch ──────────────────────────────────────────────────────

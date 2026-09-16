@@ -237,10 +237,6 @@ if (deckToggle) {
   }, { passive: true });
 })();
 
-// The demo section embeds the real build (app/index.html) in an iframe, so the
-// mockup's HUD and dashboard modules that used to live here are gone. Their
-// behaviour now comes from the build's own app.js.
-
 // ---------- hero diamond field ----------
 // Restored: an earlier edit of mine trimmed this file at the demo modules and
 // took the generator with it, leaving the container and its CSS behind with
@@ -297,29 +293,6 @@ if (deckToggle) {
   toggle.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
   nav.addEventListener('click', (e) => { if (e.target.tagName === 'A') setOpen(false); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-})();
-
-// ---------- demo embed ----------
-// The embed renders at a fixed logical width and is scaled to fit its column.
-// Narrowing the iframe instead would trip the HUD's own 860px breakpoint and
-// swap in its mobile layout — on this page the demo should get smaller, not
-// become a different interface.
-(function demoEmbed() {
-  const frame = document.getElementById('demo-frame');
-  const embed = document.getElementById('demo-embed');
-  if (!frame || !embed) return;
-
-  const LOGICAL_W = 1440;
-  const LOGICAL_H = 900;
-
-  function fit() {
-    const scale = frame.clientWidth / LOGICAL_W;
-    embed.style.transform = `scale(${scale})`;
-    frame.style.height = Math.round(LOGICAL_H * scale) + 'px';
-  }
-  fit();
-  window.addEventListener('resize', fit, { passive: true });
-  if (window.ResizeObserver) new ResizeObserver(fit).observe(frame);
 })();
 
 // ---------- throw label follows the cursor ----------
