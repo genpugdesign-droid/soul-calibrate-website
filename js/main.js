@@ -214,6 +214,8 @@ if (deckToggle) {
 
   window.addEventListener('wheel', (event) => {
     if (event.ctrlKey) return;               // leave pinch-zoom alone
+    // a bio is open: let the popup scroll natively and keep the page still
+    if (document.documentElement.classList.contains('bio-open')) return;
     event.preventDefault();
     const lines = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
     target = Math.min(Math.max(target + event.deltaY * lines, 0), maxScroll());
@@ -293,6 +295,188 @@ if (deckToggle) {
   toggle.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
   nav.addEventListener('click', (e) => { if (e.target.tagName === 'A') setOpen(false); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+})();
+
+// ---------- team bios ----------
+// Clicking a member opens their bio in a square popup. It is one <dialog>,
+// refilled per member: the header is cloned from the card so the two can never
+// disagree, and the full bio and gallery come from the member's template.
+// Prev/next wrap around, so any member reaches the others.
+(function teamBios() {
+  const dialog = document.getElementById('bio-dialog');
+  const body = document.getElementById('bio-body');
+  const members = Array.from(document.querySelectorAll('.team-list .member'));
+  if (!dialog || !body || !members.length || typeof dialog.showModal !== 'function') return;
+
+  const count = document.getElementById('bio-count');
+  const pad = (n) => String(n).padStart(2, '0');
+  const root = document.documentElement;
+  let index = 0;
+
+  // One narrow-screen switch, shared with the CSS: below it the two blocks stack
+  // and the whole body scrolls instead of the bio column alone.
+  const stacked = window.matchMedia('(max-width: 640px)');
+
+  function render(i, direction) {
+    index = (i + members.length) % members.length;
+    const m = members[index];
+
+    const head = document.createElement('div');
+    head.className = 'bio-head';
+    const shot = m.querySelector('.member-shot').cloneNode(true);
+    shot.className = 'bio-shot';
+    const text = document.createElement('div');
+    const name = document.createElement('h2');
+    name.id = 'bio-name';
+    name.textContent = m.querySelector('h3').textContent;
+    text.append(name, m.querySelector('.member-role').cloneNode(true));
+    const links = m.querySelector('.member-links');
+    if (links) text.append(links.cloneNode(true));
+    head.append(shot, text);
+
+    const more = m.querySelector('template.member-more');
+    const extra = more ? more.content.cloneNode(true) : document.createDocumentFragment();
+    const gallery = extra.querySelector('.bio-gallery');
+    if (gallery) gallery.remove();
+    const cta = extra.querySelector('.bio-cta');
+    if (cta) cta.remove();
+
+    // left block: the bio scrolls in its own box, any call to action sits under it
+    const bio = document.createElement('div');
+    bio.className = 'bio-text';
+    bio.append(extra, scrollCue(bio));
+    const main = document.createElement('div');
+    main.className = 'bio-main';
+    main.append(bio);
+    if (cta) main.append(cta);
+
+    // header across the top; the gallery takes the right block when there is one
+    body.replaceChildren(head, main);
+    body.classList.toggle('has-gallery', !!gallery);
+    if (gallery) body.append(galleryPanel(gallery));
+    body.append(scrollCue(body));
+
+    count.textContent = `${pad(index + 1)} / ${pad(members.length)}`;
+    body.scrollTop = 0;
+    requestAnimationFrame(syncCues);
+
+    body.classList.remove('is-swapping');
+    if (direction) {
+      body.style.setProperty('--swap-from', direction > 0 ? '16px' : '-16px');
+      void body.offsetWidth;                 // restart the animation
+      body.classList.add('is-swapping');
+    }
+  }
+
+  // A "scroll" pill pinned to the bottom of a scrolling block. It shows only
+  // while that block has more below, so it is never a false promise.
+  function scrollCue(scroller) {
+    const cue = document.createElement('div');
+    cue.className = 'bio-cue';
+    cue.hidden = true;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'bio-cue-btn';
+    btn.innerHTML = 'Scroll for more <span aria-hidden="true">&darr;</span>';
+    btn.addEventListener('click', () =>
+      scroller.scrollBy({ top: scroller.clientHeight * 0.7, behavior: 'smooth' }));
+    cue.append(btn);
+    cue._scroller = scroller;
+    scroller.addEventListener('scroll', syncCues, { passive: true });
+    return cue;
+  }
+
+  function syncCues() {
+    body.querySelectorAll('.bio-cue').forEach((cue) => {
+      const s = cue._scroller;
+      const scrollable = getComputedStyle(s).overflowY !== 'visible';
+      const left = s.scrollHeight - s.clientHeight - s.scrollTop;
+      cue.hidden = !scrollable || left < 12;
+    });
+  }
+
+  // One photo at a time, shown whole rather than cropped, with its caption
+  // directly under it and the arrows at the foot of the panel. The arrows only ever page
+  // the photos; people move with the arrows up top.
+  function galleryPanel(gallery) {
+    const items = Array.from(gallery.children);
+    // a clip in the strip plays only while it is the photo on show
+    const clips = items.map((li) => li.querySelector('video'));
+    const panel = document.createElement('div');
+    panel.className = 'bio-gallery-panel';
+
+    const frame = document.createElement('div');
+    frame.className = 'bio-gallery-frame';
+    frame.append(gallery);
+
+    const controls = document.createElement('div');
+    controls.className = 'bio-gallery-controls';
+    const prev = document.createElement('button');
+    const next = document.createElement('button');
+    prev.type = next.type = 'button';
+    prev.className = 'bio-gallery-step';
+    next.className = 'bio-gallery-step';
+    prev.innerHTML = '&larr;';
+    next.innerHTML = '&rarr;';
+    prev.setAttribute('aria-label', 'Previous photo');
+    next.setAttribute('aria-label', 'Next photo');
+    const counter = document.createElement('span');
+    counter.className = 'bio-gallery-count';
+    controls.append(prev, counter, next);
+
+    const current = () =>
+      Math.min(items.length - 1, Math.max(0, Math.round(gallery.scrollLeft / Math.max(1, gallery.clientWidth))));
+    const go = (n) => gallery.scrollTo({ left: n * gallery.clientWidth, behavior: 'smooth' });
+    const sync = () => {
+      const n = current();
+      counter.textContent = `${pad(n + 1)} / ${pad(items.length)}`;
+      prev.disabled = n === 0;
+      next.disabled = n === items.length - 1;
+      clips.forEach((v, k) => {
+        if (!v) return;
+        if (k === n) { v.play().catch(() => {}); } else { v.pause(); }
+      });
+    };
+    prev.addEventListener('click', () => go(current() - 1));
+    next.addEventListener('click', () => go(current() + 1));
+    gallery.addEventListener('scroll', sync, { passive: true });
+    sync();
+
+    panel.append(frame);
+    if (items.length > 1) panel.append(controls);
+    return panel;
+  }
+
+  window.addEventListener('resize', () => { if (dialog.open) syncCues(); }, { passive: true });
+  if (stacked.addEventListener) stacked.addEventListener('change', () => { if (dialog.open) syncCues(); });
+  dialog.addEventListener('load', syncCues, true);   // images landing change heights
+
+  function open(i) {
+    render(i, 0);
+    root.classList.add('bio-open');
+    dialog.showModal();
+    document.getElementById('bio-close').focus();
+  }
+
+  members.forEach((m, i) => {
+    m.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;     // LinkedIn and portfolio go where they point
+      open(i);
+    });
+  });
+
+  document.getElementById('bio-prev').addEventListener('click', () => render(index - 1, -1));
+  document.getElementById('bio-next').addEventListener('click', () => render(index + 1, 1));
+  document.getElementById('bio-close').addEventListener('click', () => dialog.close());
+
+  // a click that lands on the dialog itself, not the card, is the backdrop
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+  dialog.addEventListener('close', () => root.classList.remove('bio-open'));
+  dialog.addEventListener('keydown', (e) => {
+    if (e.target.closest('.bio-gallery-panel')) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); render(index - 1, -1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); render(index + 1, 1); }
+  });
 })();
 
 // ---------- throw label follows the cursor ----------

@@ -530,28 +530,35 @@ a { color: inherit; }
   background: var(--bg);
 }
 
+/* One gap between every card, at every width. The slots used to be a screen
+   tall each, which is what held a card pinned under the header while that
+   screen scrolled by — but that hold IS the empty space between the cards, and
+   it ran as wide as 486px on one pair and 174px on the next, since the cards
+   are nowhere near the same height. A slot now hugs its card, so the deck
+   scrolls as one column with the same 28px between every pair. */
 .card-slot {
-  min-height: 100vh;
+  min-height: auto;
   display: flex;
   align-items: center;
-  padding: 0 6vw 0 4vw;
+  padding: 14px 6vw 14px 4vw;
 }
 
 .card-slot:first-child {
   align-items: flex-start;
-  padding-top: 20px;
+  padding-top: 24px;
 }
 
 .card-slot:last-child {
-  min-height: calc(100vh + 24px);
-  padding-bottom: 24px;
+  min-height: auto;
+  padding-bottom: 0;
 }
 
 /* guarantees the clearance above the dojos section in every layout mode */
-.card-slot:last-child .deck-card { margin-bottom: 24px; }
+.card-slot:last-child .deck-card { margin-bottom: 0; }
 /* and never less than 10px once the deck stacks and the slots lose their
    generous desktop padding */
-.deck-section { padding-bottom: 10px; }
+/* the same 28px again, this time as the clearance to the demo section below */
+.deck-section { padding-bottom: 28px; }
 
 .deck-card {
   position: sticky;
@@ -866,6 +873,476 @@ a { color: inherit; }
   fill: currentColor;
 }
 .member-links svg[fill="none"] { fill: none; }
+
+/* ── member → bio popup ────────────────────────────────────────────────────────
+   The whole row opens the bio. On hover the photo takes its colour back, a rail
+   lights on the left and the "read more" cue slides in; on touch there is no
+   hover to discover it with, so the cue simply stays visible. */
+.member {
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.member::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 10%;
+  bottom: 10%;
+  width: 2px;
+  background: var(--blue);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.member .member-shot { transition: filter 0.25s ease; }
+.member:hover { background-color: rgba(0, 229, 255, 0.04); }
+.member:hover::before,
+.member:focus-within::before { opacity: 1; transform: none; }
+.member:hover .member-shot { filter: none; }
+.member:hover h3 { color: var(--blue); }
+
+/* The cue is always on screen, not only on hover: an outlined button that
+   reads as the way in. Hovering anywhere on the row fills it, so the whole
+   member is plainly the target. */
+.member-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: clamp(6px, 1vh, 10px) 0 0;
+  padding: clamp(5px, 0.8vh, 7px) clamp(10px, 1.2vh, 14px);
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 1.15vh, 11px);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid var(--blue-dim);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.member-open-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.member:hover .member-open,
+.member-open:focus-visible {
+  color: var(--bg);
+  background: var(--blue);
+  border-color: var(--blue);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+}
+.member:hover .member-open-arrow { transform: translateX(4px); }
+.member-open:focus-visible { outline: 1px solid var(--blue); outline-offset: 3px; }
+
+/* the photo carries a matching badge, so the picture also reads as clickable */
+.member-shot-wrap {
+  position: relative;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+.member-shot-wrap::after {
+  /* the plus is drawn as two crossed bars, not set as a "+" glyph: a glyph
+     centres on its own font metrics, which left it sitting high in the dot */
+  content: '';
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 22px;
+  height: 22px;
+  background-color: var(--blue);
+  background-image: linear-gradient(var(--bg), var(--bg)), linear-gradient(var(--bg), var(--bg));
+  background-size: 10px 2px, 2px 10px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--bg-alt);
+  transition: transform 0.2s ease;
+}
+.member:hover .member-shot-wrap::after { transform: scale(1.15) rotate(90deg); }
+
+.bio-dialog {
+  /* fit-content is what lets margin:auto centre a modal dialog; `auto` would
+     stretch it across the viewport and pin the card to the left edge */
+  width: fit-content;
+  height: fit-content;
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  overflow: visible;
+}
+.bio-dialog::backdrop {
+  background: rgba(3, 3, 4, 0.72);
+  backdrop-filter: blur(4px);
+}
+.bio-dialog[open] .bio-card { animation: bio-in 0.22s ease-out; }
+@keyframes bio-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Square at every size: the side is the smallest of 760px and the viewport's
+   width and height, so it never needs to scroll the page to be seen whole. */
+.bio-card {
+  display: flex;
+  flex-direction: column;
+  width: min(760px, calc(100vw - 32px), calc(100dvh - 48px));
+  aspect-ratio: 1 / 1;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(211, 211, 211, 0.2);
+  overflow: hidden;
+}
+
+.bio-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 12px 14px 12px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.bio-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--blue-dim);
+}
+.bio-nav { display: flex; gap: 6px; }
+.bio-step,
+.bio-close {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+.bio-close { font-size: 20px; margin-left: 6px; }
+.bio-step:hover,
+.bio-close:hover { color: var(--blue); border-color: var(--blue-dim); background: rgba(0, 229, 255, 0.06); }
+.bio-step:focus-visible,
+.bio-close:focus-visible { outline: 1px solid var(--blue); outline-offset: 2px; }
+
+/* The name and photo run across the top. Under them, two blocks split by a
+   rule: on the left the bio scrolls in its own box, with a "scroll for more"
+   pill while there is more and any call to action pinned beneath; on the
+   right the gallery shows one photo whole, its caption, then its arrows. */
+.bio-scroll {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.bio-scroll { grid-template-rows: auto minmax(0, 1fr); }
+.bio-scroll > .bio-head { grid-column: 1 / -1; }
+.bio-scroll.has-gallery { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 0; }
+.bio-scroll > .bio-cue { display: none; }
+.bio-scroll.is-swapping { animation: bio-swap 0.2s ease-out; }
+@keyframes bio-swap {
+  from { opacity: 0; transform: translateX(var(--swap-from, 0)); }
+  to { opacity: 1; transform: none; }
+}
+
+.bio-main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+.has-gallery > .bio-main { padding-right: 20px; }
+
+.bio-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.bio-shot {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  object-fit: cover;
+  object-position: center top;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--bg);
+}
+.bio-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.bio-head .member-role { font-size: 10px; margin-bottom: 6px; }
+.bio-head .member-links { margin: 0; }
+
+.bio-text {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 0 6px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.bio-text p {
+  margin: 0 0 14px;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text);
+  opacity: 0.88;
+}
+
+/* Pinned to the bottom of whichever block scrolls: a fade over the cut-off
+   text and a pill that scrolls it on. Hidden once there is nothing below. */
+.bio-cue {
+  position: sticky;
+  bottom: 0;
+  height: 64px;
+  margin-top: -64px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  background: linear-gradient(to bottom, rgba(8, 9, 10, 0), var(--bg-alt) 80%);
+  pointer-events: none;
+}
+.bio-cue[hidden] { display: none !important; }
+.bio-cue-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: var(--bg-alt);
+  border: 1px solid var(--blue-dim);
+  border-radius: 999px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+.bio-cue-btn span { display: inline-block; animation: bio-nudge 1.6s ease-in-out infinite; }
+.bio-cue-btn:hover { color: var(--bg); background: var(--blue); border-color: var(--blue); }
+@keyframes bio-nudge { 50% { transform: translateY(3px); } }
+
+/* An outbound call to action inside a bio: a full-width bar, so it reads as
+   the next step rather than another link in the text. */
+.bio-cta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0;
+  padding: 14px 16px;
+  color: var(--text);
+  text-decoration: none;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid var(--blue-dim);
+  border-radius: 12px;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+.bio-cta-text { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; line-height: 1.4; }
+.bio-cta-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+.bio-cta-arrow {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--bg);
+  background: var(--blue);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+.bio-cta:hover,
+.bio-cta:focus-visible {
+  background: rgba(0, 229, 255, 0.12);
+  border-color: var(--blue);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.2);
+}
+.bio-cta:hover .bio-cta-arrow { transform: translate(2px, -2px); }
+.bio-cta:focus-visible { outline: 1px solid var(--blue); outline-offset: 3px; }
+
+.bio-gallery-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--border);
+}
+
+/* The frame is only a window onto the strip, with no border of its own. The
+   border sits on each photo, so it hugs that photo's own size and shape, and
+   the photo is centred in the space the frame gives it. */
+.bio-gallery-frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.bio-gallery {
+  display: flex;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.bio-gallery::-webkit-scrollbar { display: none; }
+.bio-gallery li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 0 0 100%;
+  height: 100%;
+  scroll-snap-align: start;
+}
+.bio-gallery img,
+.bio-gallery video {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  min-height: 0;
+  max-height: calc(100% - 3.4em);   /* leaves the caption its two lines */
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--bg);
+}
+.bio-gallery li.is-placeholder {
+  border: 1px dashed var(--border-strong);
+  border-radius: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* centred, so it sits under the picture whether the photo is wide or narrow */
+.bio-gallery-caption {
+  flex-shrink: 0;
+  align-self: stretch;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.bio-gallery-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.bio-gallery-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+.bio-gallery-step {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 15px;
+  color: var(--bg);
+  background: var(--blue);
+  border: 1px solid var(--blue);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s, background-color 0.15s, color 0.15s;
+}
+.bio-gallery-step:hover { transform: scale(1.08); }
+.bio-gallery-step[disabled] {
+  color: var(--text-dim);
+  background: transparent;
+  border-color: var(--border-strong);
+  cursor: default;
+  transform: none;
+}
+.bio-gallery-step:focus-visible { outline: 1px solid var(--blue); outline-offset: 3px; }
+
+html.bio-open { overflow: hidden; }
+
+/* Too narrow for two columns inside a square: the blocks stack, bio above
+   gallery, and the body scrolls as one. */
+@media (max-width: 640px) {
+  .bio-scroll,
+  .bio-scroll.has-gallery {
+    display: block;
+    padding: 16px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  /* sticky offsets sit inside the scroller's padding, so reach past it */
+  .bio-scroll > .bio-cue { display: flex; bottom: -16px; margin-bottom: -16px; }
+  .bio-head { margin-bottom: 16px; }
+  .bio-text { overflow: visible; padding-right: 0; }
+  .bio-text > .bio-cue { display: none; }
+  .has-gallery > .bio-main { padding-right: 0; }
+  .bio-bar { padding-left: 16px; }
+  .bio-shot { width: 60px; height: 60px; }
+  .bio-gallery-panel {
+    margin-top: 18px;
+    padding: 18px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .bio-gallery-frame { flex: none; height: min(80vw, 320px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bio-dialog[open] .bio-card,
+  .bio-scroll.is-swapping,
+  .bio-cue-btn span { animation: none; }
+}
 
 /* ---------- video caption + collapse tab ---------- */
 /* The label follows the cursor across the footage rather than sitting in a
@@ -1611,13 +2088,10 @@ a { color: inherit; }
    type scales, so the deck stops pinning and simply flows instead of clipping. */
 @media (min-width: 861px) and (max-height: 560px) {
   .deck-card { position: relative; top: 0; max-height: none; }
-  .card-slot { min-height: auto; padding: 48px 6vw 48px 4vw; }
-  .card-slot:first-child {
-  align-items: flex-start;
-  padding-top: 20px;
-}
-
-.card-slot:last-child { min-height: auto; padding-bottom: 48px; }
+  /* #team's sticky offset outranks .deck-card's `top: 0` on id specificity, so
+     it has to be cleared here too — otherwise the team card sits 56px low and
+     the gap above it reads as half again the others. */
+  #team { top: 0; }
 }
 
 @media (max-width: 860px) {
@@ -1866,7 +2340,7 @@ code,
    :last-child kept even here — so the gaps ran 80, 191, 57 instead of matching.
    Stacked, a slot is just a card with air around it. */
 @media (max-width: 860px) {
-  .card-slot { min-height: auto; padding: 12px 6vw; }
+  .card-slot { padding: 14px 6vw; }
   .card-slot:first-child { padding-top: 24px; }
   .card-slot:last-child {
     min-height: auto;
