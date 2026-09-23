@@ -671,10 +671,21 @@ function keyedCanvas(source, canvas, opts) {
   const wctx = work.getContext('2d', { willReadFrequently: true });
   const WORK_W = 480;
 
-  function key() {
+  // Frame-drop guard. A blank readback from the decoder keys to nothing at
+  // all, and painting that clears the mark for a tick — on a phone that is
+  // the logo flickering. So a frame that keeps far fewer pixels than this
+  // source has been keeping is treated as a dropped frame: the canvas holds
+  // what it has, and the next good frame paints over it. A live count is
+  // cheaper than a second pass, so it rides inside key()'s own loop.
+  let peakKept = 0;
+  const DROP_BELOW = 0.4;     // fraction of the running peak that counts as blank
+  function keyGuarded() {
     const vw = source.videoWidth;
     const vh = source.videoHeight;
     if (!vw || !vh || source.readyState < 2) return false;
+    // A loop wrap is a seek: hold the last frame through it rather than
+    // sampling whatever the decoder has mid-flight.
+    if (source.seeking) return false;
 
     const w = Math.min(WORK_W, vw);
     const h = Math.max(1, Math.round(w * vh / vw));
@@ -683,36 +694,31 @@ function keyedCanvas(source, canvas, opts) {
     try { wctx.drawImage(source, 0, 0, w, h); } catch (e) { return false; }
     const img = wctx.getImageData(0, 0, w, h);
     const d = img.data;
+    let kept = 0;
     for (let i = 0; i < d.length; i += 4) {
       let r = d[i], g = d[i + 1], b = d[i + 2];
       if (settings.invert) { r = 255 - r; g = 255 - g; b = 255 - b; }
-
-      // the same colour the CSS filter chain produces on desktop
       let nr = A * (M[0] * r + M[1] * g + M[2] * b) + B;
       let ng = A * (M[3] * r + M[4] * g + M[5] * b) + B;
       let nb = A * (M[6] * r + M[7] * g + M[8] * b) + B;
       if (nr < 0) nr = 0; else if (nr > 255) nr = 255;
       if (ng < 0) ng = 0; else if (ng > 255) ng = 255;
       if (nb < 0) nb = 0; else if (nb > 255) nb = 255;
-
-      // brightness becomes opacity: the ground falls away, the mark stays.
-      // Measured on the FINAL colour, because that is what `screen` blends
-      // against on desktop — and contrast has already crushed the ground toward
-      // black by this point, which is what makes the floor hold. The floor
-      // matters: an inverted grey ground lands around 18/255, which is not
-      // black but is still a visible haze once it covers a whole frame.
       const lum = nr > ng ? (nr > nb ? nr : nb) : (ng > nb ? ng : nb);
       let a = (lum - FLOOR) * GAIN;
       if (a < 0) a = 0; else if (a > 255) a = 255;
+      if (a > 0) kept++;
       d[i] = nr; d[i + 1] = ng; d[i + 2] = nb;
       d[i + 3] = a;
     }
+    if (kept < peakKept * DROP_BELOW) return false;   // dropped frame: hold
+    if (kept > peakKept) peakKept = kept;
     wctx.putImageData(img, 0, 0);
     return true;
   }
 
   function paint() {
-    if (!key()) return false;
+    if (!keyGuarded()) return false;
     const cw = canvas.width;
     const ch = canvas.height;
     if (!cw || !ch) return false;
@@ -896,13 +902,36 @@ function keyedCanvas(source, canvas, opts) {
     hueRotate: 180, contrast: 1.42, brightness: 1.22, saturate: 1.12
   });
   if (!renderer) return;
-  stack.classList.add('is-canvas');
 
+  // Hand over only once there is a keyed frame in the canvas. Adding the
+  // class up front showed an empty canvas until the first paint landed —
+  // the mark absent, then present — which is the first flicker a phone sees.
+  let handedOver = false;
+  const handOver = () => {
+    if (handedOver) return;
+    handedOver = true;
+    stack.classList.add('is-canvas');
+  };
+
+  // The canvas is display:none until the class lands, so it has no client
+  // width yet; size it from the stack, which is laid out from the start.
   const fit = () => {
-    const width = canvas.clientWidth || stack.clientWidth;
-    if (width) renderer.resize(width, Math.round(width * 1080 / 2880));
+    const width = stack.clientWidth;
+    if (width) {
+      renderer.resize(width, Math.round(width * 1080 / 2880));
+      if (renderer.paint()) handOver();
+    }
   };
   source.addEventListener('loadeddata', fit);
+  source.addEventListener('playing', fit);
   window.addEventListener('resize', fit, { passive: true });
   fit();
+  // and if every event fired before the listeners attached (cached clip),
+  // retry until a frame lands
+  let tries = 0;
+  (function settle() {
+    if (handedOver || tries++ > 20) return;
+    fit();
+    setTimeout(settle, 250);
+  })();
 })();
