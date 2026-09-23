@@ -2356,3 +2356,63 @@ code,
 
   /* .deck-section keeps its 10px, which is the gap to the demo section */
 }
+
+/* Public, aggregate-only annotation progress feed. */
+.annotation-progress {
+  position: relative;
+  z-index: 2;
+  padding: 82px 6vw;
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+}
+.annotation-progress-head { max-width: 72ch; }
+.annotation-progress-head h2 {
+  margin: 10px 0 8px;
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+  font-weight: 600;
+}
+.annotation-progress-head p,
+.annotation-progress-note { color: var(--text-dim); font-size: .88rem; }
+.annotation-progress-head p { margin: 0; }
+.annotation-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 30px 0 22px;
+}
+.annotation-progress-card {
+  min-height: 150px;
+  padding: 24px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel);
+}
+.annotation-progress-card strong {
+  display: block;
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: clamp(1.7rem, 3vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.annotation-progress-card span {
+  display: block;
+  margin-top: 12px;
+  color: var(--text-dim);
+  font-size: .74rem;
+  line-height: 1.45;
+}
+.annotation-progress-context {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: .78rem;
+}
+.annotation-progress-note { margin: 0; max-width: 95ch; }
+@media (max-width: 980px) {
+  .annotation-progress-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .annotation-progress-grid { grid-template-columns: 1fr; }
+  .annotation-progress-card { min-height: 116px; }
+}

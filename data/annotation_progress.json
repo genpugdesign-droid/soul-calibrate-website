@@ -1,0 +1,29 @@
+{
+  "as_of_utc": "2026-09-23T04:54:37+00:00",
+  "counts": {
+    "accepted_detector_labels": 121,
+    "accepted_recall_events": 44,
+    "candidate_link_decisions": 7188,
+    "human_review_actions": 5800,
+    "lead_reviewed_candidate_clips_complete": 831,
+    "lead_reviewed_candidate_window_minutes": 92.83,
+    "recorded_session_minutes": 412.41,
+    "recorded_sessions": 199,
+    "sessions_with_recorded_review": 125,
+    "span_clip_reviews": 1326,
+    "throw_spans_drawn": 711,
+    "unique_detector_fires": 2186,
+    "unique_detector_fires_with_verdict": 687
+  },
+  "definitions": {
+    "accepted_detector_labels": "TP or FP decisions with named acceptance; a separate evidence tier from recorded opinions.",
+    "human_review_actions": "Recorded human response units; repeats across people and passes are work, not unique events.",
+    "lead_reviewed_candidate_window_minutes": "Union of source-time windows with complete lead span answers; selected windows only, not whole-session annotation.",
+    "recorded_session_minutes": "Evidence-eligible source recording runtime; clips and renders are not added.",
+    "scope": "Activity inventory, including diagnostic review; no precision, recall, accuracy, or safety claim. Drafts, fixtures and superseded unissued work are excluded from review-action counters.",
+    "sessions_with_recorded_review": "Distinct source sessions with at least one recorded human review action or complete lead candidate-window answer.",
+    "unique_detector_fires_with_verdict": "Distinct detector-fire subjects with any recorded human verdict; repeated reviews count once."
+  },
+  "schema": "magi_public_annotation_progress_v1",
+  "source_catalog_sha256": "sha256:bd01a7c7f9a38b0ff62ceb780b398b3ee5d9cfa1c73943b0ca5c0848e914e4da"
+}

@@ -261,6 +261,26 @@
 
   </section>
 
+  <section class="annotation-progress" id="annotation-progress" aria-labelledby="annotation-progress-title">
+    <div class="annotation-progress-head">
+      <span class="card-tag tag-blue">// EVIDENCE IN PROGRESS</span>
+      <h2 id="annotation-progress-title">What we have reviewed</h2>
+      <p>Counts from our annotation records. A detector fire with several reviews counts once as a fire; review actions count the work each person did.</p>
+    </div>
+    <div class="annotation-progress-grid" aria-live="polite">
+      <div class="annotation-progress-card"><strong data-progress="sessions_with_recorded_review">—</strong><span>sessions with recorded review</span></div>
+      <div class="annotation-progress-card"><strong data-progress="lead_reviewed_candidate_window_minutes">—</strong><span>minutes of lead-reviewed candidate windows</span></div>
+      <div class="annotation-progress-card"><strong data-progress="unique_detector_fires_with_verdict">—</strong><span>distinct detector fires with a human verdict</span></div>
+      <div class="annotation-progress-card"><strong data-progress="throw_spans_drawn">—</strong><span>throw spans drawn</span></div>
+    </div>
+    <p class="annotation-progress-context">
+      <span data-progress="recorded_sessions">—</span> source sessions / <span data-progress="recorded_session_minutes">—</span> recorded minutes ·
+      <span data-progress="accepted_detector_labels">—</span> accepted detector labels ·
+      <span data-progress="candidate_link_decisions">—</span> candidate-link decisions
+    </p>
+    <p class="annotation-progress-note">Reviewed minutes cover selected candidate windows, not whole sessions. These are activity counts, not accuracy or safety results. <span id="annotation-progress-updated">Loading latest counts…</span></p>
+  </section>
+
   <section class="demo" id="demo">
     <div class="demo-head">
       <span class="card-tag tag-blue">// DEMO</span>
@@ -338,5 +358,6 @@
 </dialog>
 
 <script src="js/main.js"></script>
+<script src="js/annotation_progress.js"></script>
 </body>
 </html>
