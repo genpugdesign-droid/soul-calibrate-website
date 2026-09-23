@@ -109,6 +109,9 @@
            of being composited itself, because `screen` let the ascii field show
            through the clip's dark areas. See deckBackdrop() in main.js. -->
       <canvas class="bg-canvas" id="bg-canvas" aria-hidden="true"></canvas>
+      <!-- Touch fallback: a keyed still of the throw, shown only if the clip
+           never decodes (Low Power Mode, Data Saver). See deckBackdrop(). -->
+      <img class="bg-still" src="assets/img/throw-still.png" alt="" aria-hidden="true" loading="lazy">
       <button class="deck-toggle" id="deck-toggle" type="button" aria-expanded="true" aria-controls="cards-col">[ &raquo; ]</button>
       <div class="video-cursor" id="video-cursor" aria-hidden="true">UCHI-MATA!</div>
       <div class="video-placeholder" id="video-placeholder">

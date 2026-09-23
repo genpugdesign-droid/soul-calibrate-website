@@ -83,6 +83,9 @@ setInterval(renderAsciiFrame, 120);
 // the "NO SIGNAL" text is dismissed once real footage is ready.
 const deckSection = document.getElementById('deck');
 const video = document.getElementById('bg-video');
+// Touch devices get a looping panel; pointer devices scrub. Decided once, here,
+// because scrubVideo() below can run before the touch block further down.
+const TOUCH_DECK = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const signalBox = document.querySelector('.signal-box');
 
 let videoReady = false;
@@ -101,7 +104,7 @@ video.addEventListener('loadedmetadata', markVideoReady);
 if (video.readyState >= HTMLMediaElement.HAVE_METADATA) markVideoReady();
 
 function scrubVideo() {
-  if (!videoReady) return;
+  if (!videoReady || TOUCH_DECK) return;
 
   const rect = deckSection.getBoundingClientRect();
   const total = rect.height - window.innerHeight;
@@ -130,34 +133,47 @@ window.addEventListener('scroll', () => {
 // without a gesture, so the clip is played for one frame and paused again:
 // enough to force a decode, after which seeking paints like it does on desktop.
 // Some browsers still refuse before any interaction, so the first touch retries.
-(function primeVideoForTouch() {
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+// On touch the clip is its own panel above the cards (see the max-width: 860px
+// block in style.css) and simply plays on a loop. Scrubbing was the wrong tool
+// there: momentum scrolling coalesces seeks, several browsers will not decode a
+// video that has only ever been seeked, and a paused, seeked frame is what
+// drawImage() copies least reliably. A playing clip has none of those problems.
+//
+// Muted inline playback needs no gesture in the default configuration, but Low
+// Power Mode (iOS) and Data Saver (Android) refuse it until one arrives, so the
+// retry hangs off every kind of activation rather than one touchstart — which
+// iOS does not even count as a gesture for media.
 
-  let primed = false;
+(function loopVideoOnTouch() {
+  if (!TOUCH_DECK) return;
+  video.loop = true;
+
+  let started = false;
   const kick = () => {
-    if (primed) return;
+    if (started) return;
     const playing = video.play();
     if (playing && playing.then) {
-      playing.then(() => {
-        primed = true;
-        video.pause();
-        scrubVideo();          // paint the frame the current scroll position wants
-      }).catch(() => { /* refused until a gesture; the listener below retries */ });
+      playing.then(() => { started = true; })
+             .catch(() => { /* refused until a gesture; the listeners retry */ });
     }
   };
 
   kick();
   video.addEventListener('loadedmetadata', kick);
-  document.addEventListener('touchstart', kick, { passive: true, once: true });
+  for (const type of ['touchend', 'click', 'scroll', 'keydown']) {
+    document.addEventListener(type, kick, { passive: true });
+  }
 })();
 
-// The clip never plays on its own at any size: scroll position is the only
-// thing that moves it, on mobile as well as desktop.
-video.loop = false;
-video.addEventListener('loadeddata', () => {
-  video.pause();
-  scrubVideo();
-});
+// On a pointer device the clip never plays on its own: scroll position is the
+// only thing that moves it.
+if (!TOUCH_DECK) {
+  video.loop = false;
+  video.addEventListener('loadeddata', () => {
+    video.pause();
+    scrubVideo();
+  });
+}
 
 // Collapse the cards column so the footage can run full width.
 const deckToggle = document.getElementById('deck-toggle');
@@ -766,10 +782,16 @@ function keyedCanvas(source, canvas, opts) {
   // occlude what is behind them while the ground and the soft halo around them
   // stay keyed out, and the clip keeps its own tonality because only alpha is
   // being clipped here, never colour.
+  // Touch now gets the same treatment as the pointer path: the clip is a panel
+  // of its own above the cards there, not a backdrop under them, so it is
+  // painted at full strength and `cover`, and repainted on the frame clock
+  // because it loops instead of being scrubbed.
   const renderer = keyedCanvas(source, canvas, {
-    alpha: isTouch ? 0.55 : 1,
-    fit: isTouch ? 'contain' : 'cover',
-    knee: 90
+    alpha: 1,
+    fit: 'cover',
+    knee: 90,
+    animate: isTouch,
+    fps: 15
   });
   if (!renderer) return;
 
@@ -838,6 +860,15 @@ function keyedCanvas(source, canvas, opts) {
     if (paintNow() || tries++ > 12) return;
     setTimeout(settle, 250);
   })();
+
+  // A phone that refuses to decode (Low Power Mode, Data Saver, a browser with
+  // autoplay fully off) would otherwise show the ascii field alone. After a
+  // grace period a keyed still of the throw stands in; it is dropped again the
+  // moment a real frame lands, so a late gesture still gets the moving clip.
+  if (isTouch) {
+    setTimeout(() => { if (!handedOver) wrap.classList.add('is-still'); }, 2500);
+    source.addEventListener('playing', () => wrap.classList.remove('is-still'));
+  }
 })();
 
 // The hero lockup: a looping animation, so it repaints continuously. Its source
