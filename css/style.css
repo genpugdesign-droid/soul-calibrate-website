@@ -2325,6 +2325,13 @@ code,
    canvas hidden — which is exactly what happened the first time. */
 .hero-stack.is-canvas .hero-mark-canvas { display: block; }
 
+/* Touch: the raw video is hidden from the first tick (is-touch), the canvas
+   shows once a frame is keyed (is-canvas), and the still only when neither
+   has produced a mark (is-still). Hidden at every width by default. */
+.hero-stack.is-touch .hero-mark { opacity: 0; position: absolute; }
+.hero-mark-still { display: none; width: 100%; height: auto; pointer-events: none; }
+.hero-stack.is-still .hero-mark-still { display: block; }
+
 /* ── mobile: one spacing between every card ───────────────────────────────────
    The slots inherited a 100vh minimum from the desktop sticky layout, which
    :last-child kept even here — so the gaps ran 80, 191, 57 instead of matching.

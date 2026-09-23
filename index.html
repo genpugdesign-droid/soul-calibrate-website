@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=20260923c">
 </head>
 <body>
 
@@ -75,6 +75,9 @@
       <!-- Touch only: the frames are keyed and drawn here instead, because the
            CSS knockout depends on mix-blend-mode. See keyedCanvas() in main.js. -->
       <canvas class="hero-mark-canvas" id="hero-mark-canvas" aria-hidden="true"></canvas>
+      <!-- Touch fallback: a pre-keyed still of the mark, shown only if the clip
+           never yields a usable frame. See heroMark() in main.js. -->
+      <img class="hero-mark-still" src="assets/img/magi-mark-still.png" alt="" aria-hidden="true" width="1440" height="540">
     </h1>
 
       <!-- Directly under the lockup and centred on it, so the claim reads as
@@ -360,6 +363,6 @@
   </div>
 </dialog>
 
-<script src="js/main.js"></script>
+<script src="js/main.js?v=20260923c"></script>
 </body>
 </html>

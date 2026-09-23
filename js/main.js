@@ -679,6 +679,7 @@ function keyedCanvas(source, canvas, opts) {
   // cheaper than a second pass, so it rides inside key()'s own loop.
   let peakKept = 0;
   const DROP_BELOW = 0.4;     // fraction of the running peak that counts as blank
+  const UNIFORM_SPREAD = 6;   // luminance std-dev below which a frame has no picture
   function keyGuarded() {
     const vw = source.videoWidth;
     const vh = source.videoHeight;
@@ -691,9 +692,29 @@ function keyedCanvas(source, canvas, opts) {
     const h = Math.max(1, Math.round(w * vh / vw));
     if (work.width !== w || work.height !== h) { work.width = w; work.height = h; }
 
-    try { wctx.drawImage(source, 0, 0, w, h); } catch (e) { return false; }
-    const img = wctx.getImageData(0, 0, w, h);
+    let img;
+    try {
+      wctx.drawImage(source, 0, 0, w, h);
+      img = wctx.getImageData(0, 0, w, h);
+    } catch (e) { return false; }   // readback refused: hold the last frame
     const d = img.data;
+
+    // A hardware decoder on Android can hand back a solid BLACK frame instead
+    // of the picture (observed on a Galaxy S22 in Firefox). For an inverted
+    // source that keys to a solid white, fully opaque rectangle — the worst
+    // possible frame, and one the kept-pixel guard below reads as "everything
+    // kept". So first ask whether the frame has any picture in it at all: a
+    // uniform frame has no spread in luminance, real footage always does.
+    let sum = 0, sumSq = 0;
+    const n = d.length / 4;
+    for (let i = 0; i < d.length; i += 4) {
+      const y = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8;
+      sum += y; sumSq += y * y;
+    }
+    const mean = sum / n;
+    const spread = Math.sqrt(Math.max(0, sumSq / n - mean * mean));
+    if (spread < UNIFORM_SPREAD) return false;   // black/blank/solid: dropped
+
     let kept = 0;
     for (let i = 0; i < d.length; i += 4) {
       let r = d[i], g = d[i + 1], b = d[i + 2];
@@ -903,6 +924,11 @@ function keyedCanvas(source, canvas, opts) {
   });
   if (!renderer) return;
 
+  // The raw <video> goes out of sight immediately: on a phone that ignores
+  // mix-blend-mode its light grey ground paints as a solid box, which is what
+  // the S22 showed while the canvas had nothing yet.
+  stack.classList.add('is-touch');
+
   // Hand over only once there is a keyed frame in the canvas. Adding the
   // class up front showed an empty canvas until the first paint landed —
   // the mark absent, then present — which is the first flicker a phone sees.
@@ -911,7 +937,11 @@ function keyedCanvas(source, canvas, opts) {
     if (handedOver) return;
     handedOver = true;
     stack.classList.add('is-canvas');
+    stack.classList.remove('is-still');
   };
+  // If the decoder never yields a usable frame, a pre-keyed still of the mark
+  // stands in — a still logo beats a white box or nothing at all.
+  setTimeout(() => { if (!handedOver) stack.classList.add('is-still'); }, 1500);
 
   // The canvas is display:none until the class lands, so it has no client
   // width yet; size it from the stack, which is laid out from the start.
