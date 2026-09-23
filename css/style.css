@@ -2048,16 +2048,6 @@ html.bio-open { overflow: hidden; }
   .bg-video { opacity: 0; }
 
   /* keyed still that stands in when nothing decodes; see deckBackdrop() */
-  .bg-still {
-    display: none;
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 3;
-    pointer-events: none;
-  }
   .video-bg-wrap.is-still .bg-still { display: block; }
 
   .cards-col { position: relative; z-index: 1; background: transparent; }
@@ -2308,6 +2298,21 @@ code,
 }
 .video-bg-wrap.is-canvas .bg-canvas { display: block; }
 .video-bg-wrap.is-canvas .bg-video { opacity: 0; }
+
+/* The touch fallback still. Hidden at EVERY width: it only shows when the
+   touch path adds `is-still` (rule in the max-width: 860px block). Declared
+   inside that block alone it rendered as an ordinary inline image on desktop —
+   a second, static copy of the throw under the live one (2026-09-23). */
+.bg-still {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 3;
+  pointer-events: none;
+}
 
 .hero-mark-canvas {
   display: none;
