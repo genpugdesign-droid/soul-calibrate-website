@@ -2376,10 +2376,15 @@ code,
    quiet meta line. Nothing else — the address is the whole point. */
 .contact-card {
   position: relative;
-  max-width: 640px;
-  padding: 28px 32px 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  width: 100%;              /* the same edges as the demo frame and the dojo row */
+  box-sizing: border-box;
+  padding: 30px 36px 26px;
   border: 1px solid var(--border-strong);
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), transparent 55%), var(--panel);
+  background: linear-gradient(120deg, rgba(0, 229, 255, 0.05), transparent 45%), var(--panel);
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .contact-card::before {
@@ -2397,6 +2402,8 @@ code,
   border-color: var(--blue-dim);
   box-shadow: 0 0 24px rgba(0, 229, 255, 0.12);
 }
+.contact-main { min-width: 0; }
+.contact-side { flex-shrink: 0; text-align: right; }
 .contact-kicker {
   display: block;
   margin-bottom: 14px;
@@ -2429,15 +2436,20 @@ code,
 .contact-mail:hover .contact-mail-arrow { transform: translate(2px, -2px); }
 .contact-mail:focus-visible { outline: 1px solid var(--blue); outline-offset: 4px; }
 .contact-meta {
-  margin: 14px 0 0;
+  margin: 0;
+  line-height: 1.5;
   font-size: 0.82rem;
   letter-spacing: 0.02em;
   color: var(--text-dim);
 }
-.contact-links { margin: 18px 0 0; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.contact-links { margin: 12px 0 0; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
 .contact-links a { color: var(--text-dim); text-decoration: none; transition: color 0.2s ease; }
 .contact-links a:hover, .contact-links a:focus-visible { color: var(--blue); }
 
+@media (max-width: 760px) {
+  .contact-card { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .contact-side { text-align: left; }
+}
 @media (max-width: 560px) {
   .contact { padding: 64px 6vw 72px; }
   .contact-card { padding: 22px 20px 20px; }
