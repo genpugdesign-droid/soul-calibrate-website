@@ -1,5 +1,5 @@
 {
-  "as_of_utc": "2026-09-23T04:54:37+00:00",
+  "as_of_utc": "2026-09-23T05:02:23+00:00",
   "counts": {
     "accepted_detector_labels": 121,
     "accepted_recall_events": 44,
@@ -9,7 +9,7 @@
     "lead_reviewed_candidate_window_minutes": 92.83,
     "recorded_session_minutes": 412.41,
     "recorded_sessions": 199,
-    "sessions_with_recorded_review": 125,
+    "sessions_with_recorded_review": 117,
     "span_clip_reviews": 1326,
     "throw_spans_drawn": 711,
     "unique_detector_fires": 2186,
@@ -21,7 +21,7 @@
     "lead_reviewed_candidate_window_minutes": "Union of source-time windows with complete lead span answers; selected windows only, not whole-session annotation.",
     "recorded_session_minutes": "Evidence-eligible source recording runtime; clips and renders are not added.",
     "scope": "Activity inventory, including diagnostic review; no precision, recall, accuracy, or safety claim. Drafts, fixtures and superseded unissued work are excluded from review-action counters.",
-    "sessions_with_recorded_review": "Distinct source sessions with at least one recorded human review action or complete lead candidate-window answer.",
+    "sessions_with_recorded_review": "Distinct evidence-eligible source sessions with at least one recorded human review action or complete lead candidate-window answer.",
     "unique_detector_fires_with_verdict": "Distinct detector-fire subjects with any recorded human verdict; repeated reviews count once."
   },
   "schema": "magi_public_annotation_progress_v1",
