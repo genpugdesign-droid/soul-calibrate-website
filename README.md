@@ -73,10 +73,6 @@ The scroll-scrub script in `js/main.js` picks it up automatically — no other c
 Open `index.html` directly in a browser, or serve the folder (`python3 -m http.server`) so
 relative asset paths resolve the same way they will in production.
 
-## Annotation progress
-
-The public evidence card reads `data/annotation_progress.json`, a sanitized aggregate export from the private MVP annotation catalog. The numbers are not embedded in HTML. Open pages refetch the feed every minute; the source workstation can publish changed feed bytes every five minutes with `MVP/scripts/refresh_public_annotation_progress.sh --publish` after its user timer is installed. The feed keeps recorded footage minutes separate from lead-reviewed candidate-window minutes and labels all counts as activity rather than model performance. See `MVP/docs/annotation/public_annotation_progress.md` for definitions and the publishing gate.
-
 ## Deploying
 
 The repo has no build step, so GitHub Pages can serve it directly from the `main` branch
