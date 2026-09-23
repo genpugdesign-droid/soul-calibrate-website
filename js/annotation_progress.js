@@ -1,7 +1,7 @@
 (() => {
   const updated = document.getElementById('annotation-progress-updated');
   if (!updated) return;
-  const refresh = () => fetch('data/annotation_progress.json', { cache: 'no-store' })
+  const refresh = () => fetch(`data/annotation_progress.json?fresh=${Date.now()}`, { cache: 'no-store' })
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
