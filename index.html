@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260923c">
+<link rel="stylesheet" href="css/style.css?v=20260923h">
 </head>
 <body>
 
@@ -106,7 +106,12 @@
 
     <div class="video-bg-wrap" id="video-bg-wrap">
       <video class="bg-video" id="bg-video" muted playsinline preload="auto">
-        <source src="assets/video/throw_asset_no_bg.mp4" type="video/mp4">
+        <!-- H.264 High first (Safari, iOS, Android, Chrome, Windows/macOS). The
+             VP9 WebM is for Linux browsers built without H.264 (Chromium,
+             Firefox without a system decoder). Both are all-intra so a scrub
+             seek is one frame's decode. -->
+        <source src="assets/video/throw_asset_no_bg.mp4" type='video/mp4; codecs="avc1.64001F"'>
+        <source src="assets/video/throw_asset_no_bg.webm" type='video/webm; codecs="vp9"'>
       </video>
       <!-- Every device: the video element is painted into this canvas instead
            of being composited itself, because `screen` let the ascii field show
@@ -285,6 +290,11 @@
              aria-label="magi running on a monitor beside the mat, analysing a live judo round">
         <source src="assets/video/magi-demo.mp4" type="video/mp4">
       </video>
+      <!-- Opens the demo in #demo-lightbox. The whole frame is the target; the
+           chip is the visible cue. -->
+      <button class="demo-expand" id="demo-expand" type="button" aria-haspopup="dialog" aria-label="Watch the demo full screen">
+        <span class="demo-expand-chip" aria-hidden="true">[ &#10530; full screen ]</span>
+      </button>
     </div>
 
   </section>
@@ -324,16 +334,28 @@
     <div class="contact-head">
       <span class="card-tag tag-blue">// CONTACT</span>
       <h2>Talk to us</h2>
-      <p>Dojos, athletes, investors, and anyone who wants to work with us: one address, read by the founder.</p>
+      <p>Dojos, athletes, investors, and anyone who wants to work with us: write to either founder.</p>
     </div>
     <div class="contact-card">
-      <div class="contact-main">
-        <span class="contact-kicker">// WRITE TO THE FOUNDER</span>
-        <a class="contact-mail" href="mailto:shakerzaman@gmail.com">shakerzaman@gmail.com<span class="contact-mail-arrow" aria-hidden="true">&nearr;</span></a>
+      <span class="contact-kicker">// WRITE TO THE FOUNDERS</span>
+      <div class="contact-row">
+        <div class="contact-main">
+          <a class="contact-mail" href="mailto:shakerzaman@gmail.com">shakerzaman@gmail.com<span class="contact-mail-arrow" aria-hidden="true">&nearr;</span></a>
+        </div>
+        <div class="contact-side">
+          <p class="contact-meta">Shaker Zaman<br>CEO, Founder &middot; Operations &amp; Engineering</p>
+          <p class="contact-links"><a href="https://www.linkedin.com/in/shaker-zaman-a8656416b/" target="_blank" rel="noopener">LinkedIn &nearr;</a></p>
+        </div>
       </div>
-      <div class="contact-side">
-        <p class="contact-meta">Shaker Zaman<br>CEO, Founder &middot; Operations &amp; Engineering</p>
-        <p class="contact-links"><a href="https://www.linkedin.com/in/shaker-zaman-a8656416b/" target="_blank" rel="noopener">LinkedIn &nearr;</a></p>
+      <hr class="contact-rule">
+      <div class="contact-row">
+        <div class="contact-main">
+          <a class="contact-mail" href="mailto:genpugdesign@gmail.com">genpugdesign@gmail.com<span class="contact-mail-arrow" aria-hidden="true">&nearr;</span></a>
+        </div>
+        <div class="contact-side">
+          <p class="contact-meta">Genevieve Puglissi<br>CXO, Co-Founder &middot; Design &amp; Product</p>
+          <p class="contact-links"><a href="https://www.linkedin.com/in/gen-pug/" target="_blank" rel="noopener">LinkedIn &nearr;</a> <a href="https://www.gen-pug.com/" target="_blank" rel="noopener">Portfolio &nearr;</a></p>
+        </div>
       </div>
     </div>
   </section>
@@ -363,6 +385,18 @@
   </div>
 </dialog>
 
-<script src="js/main.js?v=20260923c"></script>
+<!-- The demo, large. Its <video> gets its src only when opened, so the page
+     never downloads the clip twice, and it has controls so it can be paused,
+     scrubbed, or taken fully full screen from there. -->
+<dialog class="demo-lightbox" id="demo-lightbox" aria-label="magi demo">
+  <div class="demo-lightbox-card">
+    <button class="bio-close demo-lightbox-close" id="demo-lightbox-close" type="button" aria-label="Close">&times;</button>
+    <video class="demo-lightbox-video" id="demo-lightbox-video" muted loop playsinline controls preload="none"
+           poster="assets/img/magi-demo-poster.jpg"
+           aria-label="magi running on a monitor beside the mat, analysing a live judo round"></video>
+  </div>
+</dialog>
+
+<script src="js/main.js?v=20260923h"></script>
 </body>
 </html>
