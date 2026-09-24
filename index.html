@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260924a">
+<link rel="stylesheet" href="css/style.css?v=20260924b">
 </head>
 <body>
 
@@ -106,12 +106,7 @@
 
     <div class="video-bg-wrap" id="video-bg-wrap">
       <video class="bg-video" id="bg-video" muted playsinline preload="auto">
-        <!-- H.264 High first (Safari, iOS, Android, Chrome, Windows/macOS). The
-             VP9 WebM is for Linux browsers built without H.264 (Chromium,
-             Firefox without a system decoder). Both are all-intra so a scrub
-             seek is one frame's decode. -->
-        <source src="assets/video/throw_asset_no_bg.mp4" type='video/mp4; codecs="avc1.64001F"'>
-        <source src="assets/video/throw_asset_no_bg.webm" type='video/webm; codecs="vp9"'>
+        <source src="assets/video/throw_asset_no_bg.mp4" type="video/mp4">
       </video>
       <!-- Every device: the video element is painted into this canvas instead
            of being composited itself, because `screen` let the ascii field show
@@ -397,6 +392,6 @@
   </div>
 </dialog>
 
-<script src="js/main.js?v=20260924a"></script>
+<script src="js/main.js?v=20260924b"></script>
 </body>
 </html>

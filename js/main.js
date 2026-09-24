@@ -5,13 +5,6 @@ window.addEventListener('scroll', () => {
   header.classList.toggle('scrolled', window.scrollY > 40);
 }, { passive: true });
 
-// The mobile deck pins the throw just under the header, whose height changes
-// as the nav wraps and as `.scrolled` trims its padding — so it is measured,
-// not guessed. See the sticky .video-bg-wrap rule in style.css.
-new ResizeObserver(() => {
-  document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
-}).observe(header, { box: 'border-box' });   // `.scrolled` changes padding, not content
-
 const cards = document.querySelectorAll('.deck-card');
 
 // Cards start at opacity 0 and are revealed by .in-view. A missed observer
@@ -90,9 +83,8 @@ setInterval(renderAsciiFrame, 120);
 // the "NO SIGNAL" text is dismissed once real footage is ready.
 const deckSection = document.getElementById('deck');
 const video = document.getElementById('bg-video');
-// Touch devices play the clip while the page scrolls; pointer devices scrub it.
-// Either way the throw only moves on scroll. Decided once, here, because
-// scrubVideo() below can run before the touch block further down.
+// Touch devices get a looping panel; pointer devices scrub. Decided once, here,
+// because scrubVideo() below can run before the touch block further down.
 const TOUCH_DECK = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const signalBox = document.querySelector('.signal-box');
 
@@ -137,64 +129,39 @@ window.addEventListener('scroll', () => {
 
 // Mobile browsers will not decode a video that has never played, so a clip
 // driven only by currentTime stays blank there — the deck's background was
-// missing on phones for exactly this reason. Scrubbing was the wrong tool on
-// touch anyway: momentum scrolling coalesces seeks, several browsers will not
-// decode a video that has only ever been seeked, and a paused, seeked frame is
-// what drawImage() copies least reliably. A playing clip has none of those
-// problems.
-//
-// So on touch the throw PLAYS while the page scrolls and pauses once it has
-// been still for IDLE ms: it moves only on scroll, like the desktop scrub, but
-// every frame it shows came from ordinary playback. It is primed with one play
-// on load so the pinned panel holds a real frame before the first scroll.
+// missing on phones for exactly this reason. Muted inline playback is allowed
+// without a gesture, so the clip is played for one frame and paused again:
+// enough to force a decode, after which seeking paints like it does on desktop.
+// Some browsers still refuse before any interaction, so the first touch retries.
+// On touch the clip is its own panel above the cards (see the max-width: 860px
+// block in style.css) and simply plays on a loop. Scrubbing was the wrong tool
+// there: momentum scrolling coalesces seeks, several browsers will not decode a
+// video that has only ever been seeked, and a paused, seeked frame is what
+// drawImage() copies least reliably. A playing clip has none of those problems.
 //
 // Muted inline playback needs no gesture in the default configuration, but Low
 // Power Mode (iOS) and Data Saver (Android) refuse it until one arrives, so the
 // retry hangs off every kind of activation rather than one touchstart — which
-// iOS does not even count as a gesture for media. Once one play() has gone
-// through, later ones from scroll are allowed.
+// iOS does not even count as a gesture for media.
 
-(function playOnScrollTouch() {
+(function loopVideoOnTouch() {
   if (!TOUCH_DECK) return;
   video.loop = true;
 
-  const IDLE = 160;   // ms without a scroll event before the throw stops
-  let unlocked = false;
-  let scrolling = false;
-  let idleTimer = 0;
-
-  const deckOnScreen = () => {
-    const r = deckSection.getBoundingClientRect();
-    return r.bottom > 0 && r.top < window.innerHeight;
-  };
-
-  const tryPlay = () => {
+  let started = false;
+  const kick = () => {
+    if (started) return;
     const playing = video.play();
     if (playing && playing.then) {
-      playing.then(() => {
-        unlocked = true;
-        // a priming or gesture play: keep the frame, not the motion
-        if (!scrolling) video.pause();
-      }).catch(() => { /* refused until a gesture; the listeners retry */ });
+      playing.then(() => { started = true; })
+             .catch(() => { /* refused until a gesture; the listeners retry */ });
     }
   };
 
-  window.addEventListener('scroll', () => {
-    if (!deckOnScreen()) {
-      if (!video.paused) video.pause();
-      return;
-    }
-    scrolling = true;
-    if (video.paused) tryPlay();
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => { scrolling = false; video.pause(); }, IDLE);
-  }, { passive: true });
-
-  const prime = () => { if (!unlocked) tryPlay(); };
-  prime();
-  video.addEventListener('loadedmetadata', prime);
-  for (const type of ['touchend', 'click', 'keydown']) {
-    document.addEventListener(type, prime, { passive: true });
+  kick();
+  video.addEventListener('loadedmetadata', kick);
+  for (const type of ['touchend', 'click', 'scroll', 'keydown']) {
+    document.addEventListener(type, kick, { passive: true });
   }
 })();
 
@@ -726,7 +693,7 @@ function multiply3(a, b) {
 
 function keyedCanvas(source, canvas, opts) {
   const settings = Object.assign({
-    invert: false, alpha: 1, animate: false, fps: 15, fit: 'contain', span: 1,
+    invert: false, alpha: 1, animate: false, fps: 15, fit: 'contain',
     // The rest of the CSS filter chain, matched per caller. Identity by
     // default, so a caller with no filter to mirror pays one multiply-add per
     // channel and nothing changes.
@@ -834,17 +801,9 @@ function keyedCanvas(source, canvas, opts) {
     ctx.clearRect(0, 0, cw, ch);
     // `cover` fills the panel and crops the overflow; `contain` fits the whole
     // frame inside it — the same choice object-fit was making before the canvas.
-    // `height` fits the frame's full height and lets the sides crop, unless the
-    // panel is too narrow for the middle `span` of the width, which it then
-    // fits instead: for a clip whose subject is a centred column, that keeps
-    // the subject whole at any panel shape. `fit` may be a function, so the
-    // mode can follow the layout.
-    const fit = typeof settings.fit === 'function' ? settings.fit() : settings.fit;
-    const scale = fit === 'cover'
+    const scale = settings.fit === 'cover'
       ? Math.max(cw / work.width, ch / work.height)
-      : fit === 'height'
-        ? Math.min(ch / work.height, cw / (work.width * settings.span))
-        : Math.min(cw / work.width, ch / work.height);
+      : Math.min(cw / work.width, ch / work.height);
     const w = work.width * scale;
     const h = work.height * scale;
     ctx.globalAlpha = settings.alpha;
@@ -908,17 +867,10 @@ function keyedCanvas(source, canvas, opts) {
   // Touch now gets the same treatment as the pointer path: the clip is a panel
   // of its own above the cards there, not a backdrop under them, so it is
   // painted at full strength and `cover`, and repainted on the frame clock
-  // because it plays (while scrolling) instead of being scrubbed.
-  // On the stacked layout the panel is short and full width, and at some
-  // shapes (tablets, landscape phones) `cover` would scale to the width and
-  // crop the throwers' heads and feet — they fill the frame's full height
-  // (y 10–539 of 540) but only its middle 40% (x 286–674 of 960). `height`
-  // keeps them whole; 0.44 is that 40% plus a little air.
-  const stacked = window.matchMedia('(max-width: 860px)');
+  // because it loops instead of being scrubbed.
   const renderer = keyedCanvas(source, canvas, {
     alpha: 1,
-    fit: () => (stacked.matches ? 'height' : 'cover'),
-    span: 0.44,
+    fit: 'cover',
     knee: 90,
     animate: isTouch,
     fps: 15

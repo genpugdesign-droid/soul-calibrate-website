@@ -2025,7 +2025,7 @@ html.bio-open { overflow: hidden; }
   .video-bg-wrap {
     position: relative;
     width: 100%;
-    height: 23vh;
+    height: 46vh;
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
@@ -2041,7 +2041,7 @@ html.bio-open { overflow: hidden; }
    follow it. (It was briefly a fixed backdrop the cards scrolled over; at 55%
    under 86%-opaque cards it was effectively invisible — see the 2026-09-23
    investigation.) The panel geometry itself is in the first max-width: 860px
-   block above: relative, 23vh, full width. */
+   block above: relative, 46vh, full width. */
 @media (max-width: 860px) {
   /* The clip is composited by the canvas; the raw <video> stays out of sight
      so a browser that ignores `screen` never paints its black ground. */
@@ -2052,30 +2052,11 @@ html.bio-open { overflow: hidden; }
 
   .cards-col { position: relative; z-index: 1; background: transparent; }
 
-  /* The throw pins under the fixed header while the cards scroll up beneath
-     it, and lets go when the deck ends. It has to sit above .cards-col (z 1)
-     and keep its opaque ground, or the cards would show through it. */
-  .video-bg-wrap {
-    position: sticky;
-    top: var(--header-h, 52px);
-    z-index: 2;
-  }
-
   .deck-card { max-height: none; }
   .term-body { max-height: none; overflow: visible; }
   .deck-toggle { display: none; }
   .dojo-loc { opacity: 1; transform: none; }
   .member { flex-direction: row; }
-}
-
-/* The still is the same 960x540 frame as the clip, and its throwers fill the
-   frame's full height, so it must always fit by height, like the canvas's
-   `height` mode. On a portrait phone the 23vh panel is narrower than 16:9 and
-   `cover` already does that; once the viewport is wider than 0.4089 (where
-   100vw / 23vh reaches 16:9: tablets, landscape phones) `cover` would switch to
-   fitting the width and crop heads and feet, so `contain` takes over there. */
-@media (max-width: 860px) and (min-aspect-ratio: 4089/10000) {
-  .bg-still { object-fit: contain; }
 }
 
 /* Very short desktop windows can't fit a pinned card no matter how far the
