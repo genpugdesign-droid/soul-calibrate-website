@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>magi — shop</title>
+<link rel="icon" href="assets/img/favicon/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/img/favicon/magi-favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/img/favicon/apple-touch-icon.png">
+<meta name="description" content="[EDIT: one-line description of the magi merch shop]">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=20260924b">
+<link rel="stylesheet" href="css/shop.css?v=20260925a">
+</head>
+<body class="shop-page">
+
+<div class="crt-overlay" aria-hidden="true"></div>
+
+<header class="site-header" id="site-header">
+  <a class="logo" href="index.html" aria-label="magi — home">
+    <img class="logo-lockup" src="assets/img/magi-lockup-v2.png" alt="magi">
+  </a>
+  <button class="nav-toggle" id="nav-toggle" type="button"
+          aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+  <nav class="site-nav" id="site-nav">
+    <a href="index.html">&gt; home</a>
+    <a href="index.html#demo">&gt; demo</a>
+    <a href="index.html#contact">&gt; contact</a>
+    <a href="shop.html" aria-current="page">&gt; shop</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- Merch shop mock-up. Nothing here sells yet: every product is a
+       placeholder, marked [EDIT: ...] like the rest of the site. -->
+  <section class="shop" id="top">
+    <div class="shop-head">
+      <span class="card-tag tag-blue">// SHOP</span>
+      <h1>MAGI VISION MERCH</h1>
+      <p>[EDIT: one or two lines on the merch &mdash; what it is, who it is for, and when it drops.]</p>
+    </div>
+
+    <ul class="shop-grid">
+
+      <li>
+        <article class="deck-card shop-card" id="tees" aria-labelledby="tees-name">
+          <header class="card-head accent-blue">
+            <span class="card-idx">01</span>
+            <h2 class="card-name" id="tees-name">T-SHIRTS</h2>
+            <span class="card-rail" aria-hidden="true"></span>
+            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
+          </header>
+          <div class="shop-media" role="img" aria-label="T-shirt product photo placeholder">
+            <pre class="ascii-static shop-static" aria-hidden="true"></pre>
+            <div class="signal-box">
+              <span class="placeholder-label">[ NO IMAGE ]</span>
+              <span class="placeholder-sub">t-shirt // product photo</span>
+            </div>
+          </div>
+          <div class="term-body shop-body">
+            <span class="card-tag tag-blue">// APPAREL</span>
+            <h3 class="shop-name">[EDIT: tee name]</h3>
+            <p>[EDIT: fabric, fit, and print &mdash; e.g. heavyweight cotton with the pentacle on the chest.]</p>
+            <ul class="shop-options" aria-label="Sizes">
+              <li>S</li><li>M</li><li>L</li><li>XL</li><li>XXL</li>
+            </ul>
+            <div class="shop-buy">
+              <span class="shop-price">[EDIT: $00]</span>
+              <button class="shop-cta" type="button" disabled>[ coming soon ]</button>
+            </div>
+          </div>
+        </article>
+      </li>
+
+      <li>
+        <article class="deck-card shop-card" id="stickers" aria-labelledby="stickers-name">
+          <header class="card-head accent-red">
+            <span class="card-idx">02</span>
+            <h2 class="card-name" id="stickers-name">STICKERS</h2>
+            <span class="card-rail" aria-hidden="true"></span>
+            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
+          </header>
+          <div class="shop-media" role="img" aria-label="Sticker product photo placeholder">
+            <pre class="ascii-static shop-static" aria-hidden="true"></pre>
+            <div class="signal-box">
+              <span class="placeholder-label">[ NO IMAGE ]</span>
+              <span class="placeholder-sub">stickers // product photo</span>
+            </div>
+          </div>
+          <div class="term-body shop-body">
+            <span class="card-tag tag-red">// PRINT</span>
+            <h3 class="shop-name">[EDIT: sticker pack name]</h3>
+            <p>[EDIT: what is in the pack &mdash; sizes, finish, how many.]</p>
+            <ul class="shop-options" aria-label="Variants">
+              <li>[EDIT: variant]</li><li>[EDIT: variant]</li>
+            </ul>
+            <div class="shop-buy">
+              <span class="shop-price">[EDIT: $00]</span>
+              <button class="shop-cta" type="button" disabled>[ coming soon ]</button>
+            </div>
+          </div>
+        </article>
+      </li>
+
+      <li>
+        <article class="deck-card shop-card" id="keychains" aria-labelledby="keychains-name">
+          <header class="card-head accent-blue">
+            <span class="card-idx">03</span>
+            <h2 class="card-name" id="keychains-name">KEYCHAINS</h2>
+            <span class="card-rail" aria-hidden="true"></span>
+            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
+          </header>
+          <div class="shop-media" role="img" aria-label="Keychain product photo placeholder">
+            <pre class="ascii-static shop-static" aria-hidden="true"></pre>
+            <div class="signal-box">
+              <span class="placeholder-label">[ NO IMAGE ]</span>
+              <span class="placeholder-sub">keychain // product photo</span>
+            </div>
+          </div>
+          <div class="term-body shop-body">
+            <span class="card-tag tag-blue">// HARDWARE</span>
+            <h3 class="shop-name">[EDIT: keychain name]</h3>
+            <p>[EDIT: material, size, and finish &mdash; e.g. an enamel or metal pentacle.]</p>
+            <ul class="shop-options" aria-label="Finishes">
+              <li>[EDIT: finish]</li><li>[EDIT: finish]</li>
+            </ul>
+            <div class="shop-buy">
+              <span class="shop-price">[EDIT: $00]</span>
+              <button class="shop-cta" type="button" disabled>[ coming soon ]</button>
+            </div>
+          </div>
+        </article>
+      </li>
+
+    </ul>
+
+    <p class="shop-note">Want something before it drops? <a href="index.html#contact">Write to the founders &nearr;</a></p>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span>[ © <span id="year"></span> magi ]</span>
+  <span class="footer-links"><a href="mailto:shakerzaman@gmail.com">shakerzaman@gmail.com</a></span>
+</footer>
+
+<script src="js/shop.js?v=20260925a"></script>
+</body>
+</html>

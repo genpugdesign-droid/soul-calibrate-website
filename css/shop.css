@@ -1,0 +1,143 @@
+/* ── merch shop ────────────────────────────────────────────────────────────────
+   Loaded after style.css on shop.html only. The page reuses the site's own
+   parts — the deck card's notched double frame, the HUD card head, the
+   "[ NO SIGNAL ]" placeholder over ascii static — so the shop reads as another
+   panel of the same instrument. Only the grid and the product furniture are
+   new. */
+
+.site-nav a[aria-current="page"] { color: var(--blue); }
+
+.shop {
+  padding: 120px 6vw 100px;
+  background: var(--bg);
+}
+
+.shop-head { margin-bottom: 44px; }
+.shop-head h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+.shop-head p { margin: 0; max-width: 66ch; color: var(--text-dim); font-size: 0.9rem; }
+
+.shop-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+.shop-grid > li { display: flex; }
+
+/* The deck card is sticky, hidden until scrolled in, and sized by the deck's
+   viewport-height type. None of that applies in a grid. */
+.deck-card.shop-card {
+  position: relative;
+  top: auto;
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transform: none;
+}
+.shop-card .card-name { font-size: clamp(0.9rem, 1.3vw, 1.15rem); }
+
+/* Product photo slot: the site's no-signal placeholder, square, inside the
+   card's inner frame. */
+.shop-media {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  margin: 0 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+}
+.shop-media .signal-box { padding: 16px 22px; text-align: center; }
+.shop-media .placeholder-label { font-size: 0.95rem; }
+
+.shop-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px 24px;
+}
+.shop-name {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+.shop-card p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.shop-options {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.shop-options li {
+  padding: 5px 9px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: 1px solid var(--border-strong);
+}
+
+/* Price and button sit on the card's floor whatever the copy above runs to. */
+.shop-buy {
+  margin-top: auto;
+  padding-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.shop-price {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.shop-cta {
+  padding: 9px 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: transparent;
+  border: 1px solid var(--blue-dim);
+}
+.shop-cta:disabled { cursor: not-allowed; opacity: 0.6; }
+
+.shop-note {
+  margin: 40px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.shop-note a { color: var(--blue); text-decoration: none; }
+.shop-note a:hover, .shop-note a:focus-visible { text-decoration: underline; }
+
+@media (max-width: 1080px) {
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .shop { padding: 96px 6vw 72px; }
+  .shop-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+}
