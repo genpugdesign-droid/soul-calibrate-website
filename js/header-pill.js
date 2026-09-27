@@ -43,3 +43,16 @@
   window.addEventListener('resize', request, { passive: true });
   update();
 })();
+
+// The merch callout: × puts it away for the rest of the visit.
+(function merchCallout() {
+  const cta = document.getElementById('merch-cta');
+  const close = document.getElementById('merch-cta-close');
+  if (!cta || !close) return;
+  const KEY = 'magi-merch-cta-dismissed';
+  try { if (sessionStorage.getItem(KEY)) cta.hidden = true; } catch (e) { /* storage blocked: show it */ }
+  close.addEventListener('click', () => {
+    cta.hidden = true;
+    try { sessionStorage.setItem(KEY, '1'); } catch (e) { /* fine: hidden for this page view */ }
+  });
+})();

@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260927a">
-<link rel="stylesheet" href="css/header-pill.css?v=20260927a">
+<link rel="stylesheet" href="css/header-pill.css?v=20260927c">
 </head>
 <body>
 
@@ -37,14 +37,25 @@
     <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
   </button>
   <nav class="site-nav" id="site-nav">
-    <a href="#company">&gt; company</a>
-    <a href="#problem">&gt; problem</a>
-    <a href="#team">&gt; team</a>
-    <a href="#demo">&gt; demo</a>
-    <a href="#dojos">&gt; dojos</a>
-    <a href="#contact">&gt; contact</a>
-    <a href="shop.html">&gt; shop</a>
+    <a href="#company">company</a>
+    <a href="#problem">problem</a>
+    <a href="#team">team</a>
+    <a href="#demo">demo</a>
+    <a href="#dojos">dojos</a>
+    <a href="#contact">contact</a>
   </nav>
+  <!-- Merch sits apart from the section links: it is another page, not a
+       place on this one, and it carries the support callout. -->
+  <div class="nav-merch">
+    <a class="merch-link" href="shop.html">merch <span aria-hidden="true">&nearr;</span></a>
+    <div class="merch-cta" id="merch-cta" role="note">
+      <a class="merch-cta-link" href="shop.html">
+        <span class="merch-cta-kicker">// support magi</span>
+        <span class="merch-cta-text">stickers, t-shirts, and more!<i class="merch-cta-cursor" aria-hidden="true"></i></span>
+      </a>
+      <button class="merch-cta-close" id="merch-cta-close" type="button" aria-label="Dismiss">&times;</button>
+    </div>
+  </div>
 </header>
 
 <main>
@@ -400,6 +411,6 @@
 </dialog>
 
 <script src="js/main.js?v=20260924b"></script>
-<script src="js/header-pill.js?v=20260927a"></script>
+<script src="js/header-pill.js?v=20260927b"></script>
 </body>
 </html>
