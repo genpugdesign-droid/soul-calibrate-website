@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260927a">
+<link rel="stylesheet" href="css/header-pill.css?v=20260927a">
 <link rel="stylesheet" href="css/shop.css?v=20260925a">
 </head>
 <body class="shop-page">
@@ -38,7 +39,7 @@
 
   <!-- Merch shop mock-up. Nothing here sells yet: each product card says
        "Dropping soon" until its photo, copy, and price exist. -->
-  <section class="shop" id="top">
+  <section class="shop" id="top" data-header-tone="panel">
     <div class="shop-head">
       <span class="card-tag tag-blue">// SHOP</span>
       <h1>MAGI VISION MERCH</h1>
@@ -123,11 +124,12 @@
 
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer" data-header-tone="ink">
   <span>[ © <span id="year"></span> magi ]</span>
   <span class="footer-links"><a href="mailto:shakerzaman@gmail.com">shakerzaman@gmail.com</a></span>
 </footer>
 
 <script src="js/shop.js?v=20260925a"></script>
+<script src="js/header-pill.js?v=20260927a"></script>
 </body>
 </html>

@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260927a">
+<link rel="stylesheet" href="css/header-pill.css?v=20260927a">
 </head>
 <body>
 
@@ -48,7 +49,7 @@
 
 <main>
 
-  <section class="hero" id="top">
+  <section class="hero" id="top" data-header-tone="glass">
 
     <!-- Background. The CRT loader video is gone: it sat dead centre, which is
          where the wordmark belongs, and a looping video competing with the
@@ -108,7 +109,7 @@
 
   </section>
 
-  <section class="deck-section" id="deck">
+  <section class="deck-section" id="deck" data-header-tone="blue">
 
     <div class="video-bg-wrap" id="video-bg-wrap">
       <video class="bg-video" id="bg-video" muted playsinline preload="auto">
@@ -275,7 +276,7 @@
 
   </section>
 
-  <section class="demo" id="demo">
+  <section class="demo" id="demo" data-header-tone="ink">
     <div class="demo-head">
       <span class="card-tag tag-blue">// DEMO</span>
       <h2>EXPERIENCE MAGI VISION</h2>
@@ -300,7 +301,7 @@
 
   </section>
 
-  <section class="dojos" id="dojos">
+  <section class="dojos" id="dojos" data-header-tone="panel">
     <div class="dojos-head">
       <span class="card-tag tag-blue">// DOJOS</span>
       <h2>Where the footage comes from</h2>
@@ -331,7 +332,7 @@
     </ul>
   </section>
 
-  <section class="contact" id="contact">
+  <section class="contact" id="contact" data-header-tone="panel">
     <div class="contact-head">
       <span class="card-tag tag-blue">// CONTACT</span>
       <h2>Talk to us</h2>
@@ -363,7 +364,7 @@
 
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer" data-header-tone="ink">
   <span>[ © <span id="year"></span> magi ]</span>
   <span class="footer-links"><a href="mailto:shakerzaman@gmail.com">shakerzaman@gmail.com</a></span>
 </footer>
@@ -399,5 +400,6 @@
 </dialog>
 
 <script src="js/main.js?v=20260924b"></script>
+<script src="js/header-pill.js?v=20260927a"></script>
 </body>
 </html>
