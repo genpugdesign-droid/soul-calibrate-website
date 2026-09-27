@@ -2264,27 +2264,26 @@ html.demo-open { overflow: hidden; }
 .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
 
-@media (max-width: 860px) {
-  /* the lockup stays; the links fold into the menu */
-  .nav-toggle { display: flex; }
-  .site-header { position: fixed; }
-  .site-nav {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    left: 0;
-    display: none;
-    flex-direction: column;
-    gap: 0;
-    padding: 6px 0;
-    background: rgba(3, 3, 4, 0.97);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-  .site-nav.is-open { display: flex; }
-  .site-nav a { padding: 12px 20px; font-size: 13px; }
-  .site-nav a + a { border-top: 1px solid var(--border); }
+/* At every width the links fold into the menu and the lockup stays: six
+   sections plus the shop were too many to run across the top. */
+.nav-toggle { display: flex; }
+.site-header { position: fixed; }
+.site-nav {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  padding: 6px 0;
+  background: rgba(3, 3, 4, 0.97);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
+.site-nav.is-open { display: flex; }
+.site-nav a { padding: 12px 20px; font-size: 13px; }
+.site-nav a + a { border-top: 1px solid var(--border); }
 
 /* ── UCHI-MATA! on touch ──────────────────────────────────────────────────────
    Struck at the point of contact, with two echoes trailing behind it. The
