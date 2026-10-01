@@ -64,6 +64,28 @@
 
 .arts-panel:focus-visible { outline: 1px solid var(--blue-dim); outline-offset: 6px; }
 .arts-panel[hidden] { display: none; }
+
+/* Watch and read at once: the footage on the left, the three blocks stacked
+   on the right. The blocks run taller than a 16:9 frame at this width, so the
+   frame is sticky, held under the floating header while the column beside it
+   scrolls past. */
+@media (min-width: 981px) {
+  .arts-panel:not([hidden]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+  }
+  .arts-panel > .demo-frame {
+    position: sticky;
+    top: 88px;   /* the header bar is 12px down and about 56px tall */
+  }
+  .arts-panel > .arts-info {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin-top: 0;
+  }
+}
 .arts-panel:not([hidden]) { animation: arts-in 0.3s ease-out; }
 @keyframes arts-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
@@ -196,6 +218,7 @@
   color: var(--text-dim);
 }
 
+/* below 981px the frame and the blocks stack, the blocks one per row */
 @media (max-width: 980px) {
   .arts-info { grid-template-columns: minmax(0, 1fr); }
 }
