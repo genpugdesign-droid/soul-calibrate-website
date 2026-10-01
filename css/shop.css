@@ -58,6 +58,16 @@
   border-bottom: 1px solid var(--border);
 }
 .shop-media .signal-box { padding: 16px 22px; text-align: center; }
+/* a real product photo fills the slot; the mockups are portrait, and the
+   product sits in the middle of the frame */
+.shop-media.has-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 55%;
+}
 .shop-media .placeholder-label { font-size: 0.95rem; }
 
 .shop-body {
