@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260927a">
 <link rel="stylesheet" href="css/header-pill.css?v=20260927c">
+<link rel="stylesheet" href="css/arts.css?v=20261001a">
 </head>
 <body>
 
@@ -297,17 +298,148 @@
         running.</p>
     </div>
 
-    <div class="demo-frame" id="demo-frame">
-      <video class="demo-video" autoplay muted loop playsinline preload="metadata"
-             poster="assets/img/magi-demo-poster.jpg" width="1600" height="900"
-             aria-label="magi running on a monitor beside the mat, analysing a live judo round">
-        <source src="assets/video/magi-demo.mp4" type="video/mp4">
-      </video>
-      <!-- Opens the demo in #demo-lightbox. The whole frame is the target; the
-           chip is the visible cue. -->
-      <button class="demo-expand" id="demo-expand" type="button" aria-haspopup="dialog" aria-label="Watch the demo full screen">
-        <span class="demo-expand-chip" aria-hidden="true">[ &#10530; full screen ]</span>
-      </button>
+    <!-- One demo, three arts. Judo is the build running (the footage); BJJ and
+         wrestling show what each art scores and what it changes for the
+         system. Rules are simplified from IJF, IBJJF adult, and UWW freestyle.
+         Tabs: js/arts.js. -->
+    <div class="arts" id="arts">
+      <div class="arts-tabs" role="tablist" aria-label="Grappling arts">
+        <button class="arts-tab" role="tab" id="tab-judo" aria-controls="panel-judo" aria-selected="true" tabindex="0">
+          <span class="arts-idx">01</span><span class="arts-name">Judo</span>
+        </button>
+        <button class="arts-tab" role="tab" id="tab-bjj" aria-controls="panel-bjj" aria-selected="false" tabindex="-1">
+          <span class="arts-idx">02</span><span class="arts-name">Brazilian Jiu-Jitsu</span>
+        </button>
+        <button class="arts-tab" role="tab" id="tab-wrestling" aria-controls="panel-wrestling" aria-selected="false" tabindex="-1">
+          <span class="arts-idx">03</span><span class="arts-name">Wrestling</span>
+        </button>
+      </div>
+
+      <div class="arts-panel" role="tabpanel" id="panel-judo" aria-labelledby="tab-judo" tabindex="0">
+      <div class="demo-frame" id="demo-frame">
+        <video class="demo-video" autoplay muted loop playsinline preload="metadata"
+               poster="assets/img/magi-demo-poster.jpg" width="1600" height="900"
+               aria-label="magi running on a monitor beside the mat, analysing a live judo round">
+          <source src="assets/video/magi-demo.mp4" type="video/mp4">
+        </video>
+        <!-- Opens the demo in #demo-lightbox. The whole frame is the target; the
+             chip is the visible cue. -->
+        <button class="demo-expand" id="demo-expand" type="button" aria-haspopup="dialog" aria-label="Watch the demo full screen">
+          <span class="demo-expand-chip" aria-hidden="true">[ &#10530; full screen ]</span>
+        </button>
+      </div>
+        <div class="arts-info">
+          <section class="arts-block">
+            <span class="arts-kicker">// objective</span>
+            <p>Throw the opponent largely onto their back with force and control, or pin or submit them on the ground. One clean throw ends the match.</p>
+            <dl class="arts-facts">
+              <div><dt>attire</dt><dd>judogi</dd></div>
+              <div><dt>match</dt><dd>4 min, then golden score</dd></div>
+              <div><dt>phase</dt><dd>mostly standing; stalled groundwork is stood back up</dd></div>
+            </dl>
+          </section>
+          <section class="arts-block">
+            <span class="arts-kicker">// scoring</span>
+            <ul class="arts-score">
+              <li><span>ippon &mdash; clean throw, 20&nbsp;s hold-down, or submission</span><b>wins</b></li>
+              <li><span>waza-ari &mdash; throw short of ippon, or 10&nbsp;s hold-down</span><b>&times;2 = ippon</b></li>
+              <li><span>shido &mdash; penalty for passivity or illegal grips</span><b>3rd loses</b></li>
+            </ul>
+          </section>
+          <section class="arts-block">
+            <span class="arts-kicker arts-kicker-red">// what changes for magi</span>
+            <ul class="arts-magi">
+              <li>Grips decide who can throw, so the grip fight is read before anything moves.</li>
+              <li>Kuzushi, the off-balance, lands a beat before the throw; that beat is the event.</li>
+              <li>The throw resolves in about half a second with both athletes in one silhouette.</li>
+            </ul>
+            <p class="arts-status"><span class="arts-live">live</span> The footage above is the build reading a judo round.</p>
+          </section>
+        </div>
+      </div>
+
+      <div class="arts-panel" role="tabpanel" id="panel-bjj" aria-labelledby="tab-bjj" tabindex="0" hidden>
+        <div class="demo-frame arts-nosignal" role="img" aria-label="Brazilian Jiu-Jitsu footage placeholder">
+          <div class="signal-box">
+            <span class="placeholder-label">[ NO SIGNAL ]</span>
+            <span class="placeholder-sub">bjj // footage placeholder</span>
+          </div>
+        </div>
+        <div class="arts-info">
+          <section class="arts-block">
+            <span class="arts-kicker">// objective</span>
+            <p>Submit the opponent with a choke or joint lock. Without a submission, points for controlling positions decide it, then advantages.</p>
+            <dl class="arts-facts">
+              <div><dt>attire</dt><dd>gi or no-gi</dd></div>
+              <div><dt>match</dt><dd>5&ndash;10 min by belt</dd></div>
+              <div><dt>phase</dt><dd>almost all on the ground; positions are held 3&nbsp;s to score</dd></div>
+            </dl>
+          </section>
+          <section class="arts-block">
+            <span class="arts-kicker">// scoring</span>
+            <ul class="arts-score">
+              <li><span>takedown</span><b>2</b></li>
+              <li><span>sweep</span><b>2</b></li>
+              <li><span>knee on belly</span><b>2</b></li>
+              <li><span>guard pass</span><b>3</b></li>
+              <li><span>mount</span><b>4</b></li>
+              <li><span>back control</span><b>4</b></li>
+              <li><span>submission</span><b>wins</b></li>
+            </ul>
+          </section>
+          <section class="arts-block">
+            <span class="arts-kicker arts-kicker-red">// what changes for magi</span>
+            <ul class="arts-magi">
+              <li>Most of the match is on the ground, where two bodies overlap the longest: the hardest case for pose tracking.</li>
+              <li>Points come from holding a position for three seconds, so position and duration are read, not single moments.</li>
+              <li>No-gi removes the lapels and sleeves that carry grips in the gi, which changes what the camera can see.</li>
+            </ul>
+            <p class="arts-status">[EDIT: BJJ status &mdash; e.g. in development, collecting footage]</p>
+          </section>
+        </div>
+      </div>
+
+      <div class="arts-panel" role="tabpanel" id="panel-wrestling" aria-labelledby="tab-wrestling" tabindex="0" hidden>
+        <div class="demo-frame arts-nosignal" role="img" aria-label="Wrestling footage placeholder">
+          <div class="signal-box">
+            <span class="placeholder-label">[ NO SIGNAL ]</span>
+            <span class="placeholder-sub">wrestling // footage placeholder</span>
+          </div>
+        </div>
+        <div class="arts-info">
+          <section class="arts-block">
+            <span class="arts-kicker">// objective</span>
+            <p>Pin both shoulders to the mat for a fall and an instant win. Otherwise score more points, or open a 10-point lead for technical superiority.</p>
+            <dl class="arts-facts">
+              <div><dt>attire</dt><dd>singlet</dd></div>
+              <div><dt>match</dt><dd>2 &times; 3 min periods</dd></div>
+              <div><dt>styles</dt><dd>freestyle; Greco-Roman (upper body only); US folkstyle</dd></div>
+            </dl>
+          </section>
+          <section class="arts-block">
+            <span class="arts-kicker">// scoring</span>
+            <ul class="arts-score">
+              <li><span>takedown</span><b>2</b></li>
+              <li><span>high-amplitude throw</span><b>4&ndash;5</b></li>
+              <li><span>exposure &mdash; back turned toward the mat</span><b>2</b></li>
+              <li><span>step out</span><b>1</b></li>
+              <li><span>10-point lead</span><b>wins</b></li>
+              <li><span>fall</span><b>wins</b></li>
+            </ul>
+          </section>
+          <section class="arts-block">
+            <span class="arts-kicker arts-kicker-red">// what changes for magi</span>
+            <ul class="arts-magi">
+              <li>Shots are fast and low, so a takedown is decided at first contact rather than over a long exchange.</li>
+              <li>Exposure scores on the angle of the back to the mat, so body orientation matters, not just position.</li>
+              <li>Action runs to the edge of the mat, and step-outs make the boundary part of the score.</li>
+            </ul>
+            <p class="arts-status">[EDIT: wrestling status &mdash; e.g. in development, collecting footage]</p>
+          </section>
+        </div>
+      </div>
+
+      <p class="arts-note">Rules simplified from IJF (judo), IBJJF adult (BJJ), and UWW freestyle (wrestling).</p>
     </div>
 
   </section>
@@ -412,5 +544,6 @@
 
 <script src="js/main.js?v=20260924b"></script>
 <script src="js/header-pill.js?v=20260927b"></script>
+<script src="js/arts.js?v=20261001a"></script>
 </body>
 </html>

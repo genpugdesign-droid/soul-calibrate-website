@@ -1,0 +1,207 @@
+/* ── demo: one section, three grappling arts ───────────────────────────────────
+   Tabs in the vocabulary of the deck's card heads (index box, brand name, the
+   short accent bar under the selected one); each panel is the 16:9 demo
+   frame over three blocks: the objective, the scoring, and what the art
+   changes for the system. Judo carries the footage; the other two show the
+   site's no-signal placeholder until there is footage of them. */
+
+.arts-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.arts-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 13px 16px;
+  font-family: var(--font-brand);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.arts-tab::after {
+  /* the card head's accent bar, shown on the selected art */
+  content: "";
+  position: absolute;
+  left: 16px;
+  bottom: -1px;
+  width: 44px;
+  height: 2px;
+  background: var(--blue);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.arts-tab:hover { color: var(--text); border-color: var(--border-strong); }
+.arts-tab[aria-selected="true"] {
+  color: var(--text);
+  border-color: var(--blue-dim);
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.07), transparent 70%), var(--panel);
+}
+.arts-tab[aria-selected="true"]::after { opacity: 1; }
+.arts-tab:focus-visible { outline: 1px solid var(--blue); outline-offset: 2px; }
+.arts-idx {
+  flex: none;
+  padding: 3px 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  border: 1px solid var(--border-strong);
+}
+.arts-tab[aria-selected="true"] .arts-idx { color: var(--blue); border-color: var(--blue-dim); }
+.arts-name { min-width: 0; }
+
+.arts-panel:focus-visible { outline: 1px solid var(--blue-dim); outline-offset: 6px; }
+.arts-panel[hidden] { display: none; }
+.arts-panel:not([hidden]) { animation: arts-in 0.3s ease-out; }
+@keyframes arts-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* the no-signal frame: the demo frame's box with the placeholder's look */
+.arts-nosignal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 229, 255, 0.05) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(90deg, rgba(0, 229, 255, 0.05) 0 1px, transparent 1px 22px),
+    #04050a;
+}
+.arts-nosignal .signal-box { text-align: center; }
+
+.arts-info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+.arts-block {
+  position: relative;
+  padding: 20px 22px 22px;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+}
+.arts-block::before {
+  /* the corner tick, as on the contact panel */
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid var(--blue);
+  border-left: 2px solid var(--blue);
+}
+.arts-kicker {
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+.arts-kicker-red { color: var(--red); }
+.arts-block p { margin: 0; font-size: 0.85rem; line-height: 1.6; color: var(--text-dim); }
+
+.arts-facts { margin: 16px 0 0; display: grid; gap: 8px; }
+.arts-facts div { display: grid; grid-template-columns: 64px 1fr; gap: 10px; }
+.arts-facts dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.9;
+  color: var(--text-dim);
+}
+.arts-facts dd { margin: 0; font-size: 0.82rem; line-height: 1.5; color: var(--text); }
+
+.arts-score { list-style: none; margin: 0; padding: 0; }
+.arts-score li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+  border-bottom: 1px dashed var(--border-strong);
+}
+.arts-score li:last-child { border-bottom: 0; }
+.arts-score b {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--blue);
+  white-space: nowrap;
+}
+
+.arts-magi { margin: 0; padding: 0; list-style: none; }
+.arts-magi li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+.arts-magi li + li { margin-top: 10px; }
+.arts-magi li::before {
+  /* the HUD's committed-state diamond */
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  background: var(--red);
+  transform: rotate(45deg);
+}
+.arts-block .arts-status {
+  margin-top: 16px;
+  padding-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border-top: 1px solid var(--border);
+}
+.arts-live {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--blue);
+}
+
+.arts-note {
+  margin: 14px 0 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+@media (max-width: 980px) {
+  .arts-info { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .arts-tabs { gap: 6px; }
+  .arts-tab { flex-direction: column; align-items: flex-start; gap: 8px; padding: 11px 12px; font-size: 0.8rem; }
+  .arts-tab::after { left: 12px; }
+  .arts-block { padding: 18px 18px 20px; }
+}
