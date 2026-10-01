@@ -1,13 +1,13 @@
-/* ── demo: one section, three grappling arts ───────────────────────────────────
+/* ── demo: grappling with and without the gi ───────────────────────────────────
    Tabs in the vocabulary of the deck's card heads (index box, brand name, the
    short accent bar under the selected one); each panel is the 16:9 demo
    frame over three blocks: the objective, the scoring, and what the art
-   changes for the system. Judo carries the footage; the other two show the
-   site's no-signal placeholder until there is footage of them. */
+   changes for the system. The gi tab carries the footage; no-gi shows the
+   site's no-signal placeholder until there is footage of it. */
 
 .arts-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 18px;
 }
@@ -162,6 +162,17 @@
   border-bottom: 1px dashed var(--border-strong);
 }
 .arts-score li:last-child { border-bottom: 0; }
+/* each art's rows sit under its own name when a tab covers two */
+.arts-score li.arts-score-group {
+  padding: 14px 0 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  border-bottom: 1px solid var(--border-strong);
+}
+.arts-score li.arts-score-group:first-child { padding-top: 0; }
 .arts-score b {
   flex: none;
   font-family: var(--font-mono);

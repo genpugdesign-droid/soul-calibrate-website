@@ -1,11 +1,12 @@
-// The demo's three grappling arts, as tabs (the WAI-ARIA tabs pattern):
-// click or arrow between them, Home/End for the ends. Judo's footage is the
-// only video in the set; it pauses while another art is showing and picks up
-// again on return, so nothing decodes off screen.
+// The demo's grappling tabs, gi and no-gi (the WAI-ARIA tabs pattern): click
+// or arrow between them, Home/End for the ends. The footage pauses while its
+// tab is not showing and picks up again on return, so nothing decodes off
+// screen.
 (function grapplingArts() {
   const tabs = [...document.querySelectorAll('.arts-tab')];
   if (!tabs.length) return;
-  const video = document.querySelector('#panel-judo .demo-video');
+  const video = document.querySelector('.arts-panel .demo-video');
+  const videoPanel = video && video.closest('.arts-panel');
 
   const select = (tab, focus) => {
     for (const t of tabs) {
@@ -16,7 +17,7 @@
     }
     if (focus) tab.focus();
     if (video) {
-      if (tab.id === 'tab-judo') video.play().catch(() => {});
+      if (tab.getAttribute('aria-controls') === videoPanel.id) video.play().catch(() => {});
       else video.pause();
     }
   };
