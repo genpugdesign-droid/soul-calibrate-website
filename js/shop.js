@@ -74,3 +74,45 @@ window.addEventListener('scroll', () => {
   window.addEventListener('resize', () => { size(); render(); }, { passive: true });
   if (!reduced) setInterval(render, 120);
 })();
+
+// Product galleries: numbered buttons pick a view. A view marked
+// data-hover-preview (the video) also shows while the pointer is over the
+// gallery, until a number is picked; leaving goes back to the picked view.
+// A video plays only while its view is showing; its poster is its first frame.
+(function productGalleries() {
+  const canHover = window.matchMedia('(hover: hover)').matches;
+
+  document.querySelectorAll('.shop-gallery').forEach((gallery) => {
+    const slides = [...gallery.querySelectorAll('.shop-slide')];
+    const dots = [...gallery.querySelectorAll('.shop-dots button')];
+    const preview = slides.findIndex((s) => s.hasAttribute('data-hover-preview'));
+    let picked = 0;
+    let hovering = false;
+
+    const render = () => {
+      const shown = hovering && preview >= 0 ? preview : picked;
+      slides.forEach((s, i) => {
+        s.classList.toggle('is-active', i === shown);
+        const v = s.querySelector('video');
+        if (!v) return;
+        if (i === shown) {
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+          v.currentTime = 0;
+        }
+      });
+      dots.forEach((d, i) => d.setAttribute('aria-pressed', String(i === picked)));
+    };
+
+    dots.forEach((d, i) => d.addEventListener('click', () => {
+      picked = i;
+      hovering = false;
+      render();
+    }));
+    if (canHover) {
+      gallery.addEventListener('pointerenter', () => { hovering = true; render(); });
+      gallery.addEventListener('pointerleave', () => { hovering = false; render(); });
+    }
+  });
+})();

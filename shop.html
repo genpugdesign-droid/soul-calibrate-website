@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260927a">
 <link rel="stylesheet" href="css/header-pill.css?v=20260927c">
-<link rel="stylesheet" href="css/shop.css?v=20260930a">
+<link rel="stylesheet" href="css/shop.css?v=20261010d">
 </head>
 <body class="shop-page">
 
@@ -42,8 +42,10 @@
 
 <main>
 
-  <!-- Merch shop mock-up. Nothing here sells yet: each product card says
-       "Dropping soon" until its photo, copy, and price exist. -->
+  <!-- Merch shop. A card that sells carries a .shop-cta-mount with its
+       Shopify product id; js/shop-buy.js swaps the plain checkout link inside
+       for a Buy Button add-to-cart. The rest say "Dropping soon" until the
+       product exists in Shopify. -->
   <section class="shop" id="top" data-header-tone="panel">
     <div class="shop-head">
       <span class="card-tag tag-blue">// SHOP</span>
@@ -54,9 +56,56 @@
     <ul class="shop-grid">
 
       <li>
+        <article class="deck-card shop-card" id="stickers" aria-labelledby="stickers-name">
+          <header class="card-head accent-red">
+            <span class="card-idx">01</span>
+            <h2 class="card-name" id="stickers-name">STICKERS</h2>
+            <span class="card-rail" aria-hidden="true"></span>
+            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
+          </header>
+          <!-- Gallery: numbered views, the first shown. Hovering plays the
+               video view over whichever is showing until a number is
+               picked; picking the video view plays it. -->
+          <div class="shop-media has-photo shop-gallery">
+            <figure class="shop-slide is-active">
+              <img src="assets/img/shop/sticker-white-holo.jpg" width="922" height="1152"
+                   alt="The magi holographic sticker on a laptop palm rest">
+            </figure>
+            <figure class="shop-slide shop-slide--hand">
+              <img src="assets/img/shop/sticker-holo-hand.jpg" width="960" height="1280" loading="lazy"
+                   alt="A hand holding the magi holographic sticker">
+            </figure>
+            <figure class="shop-slide shop-slide--video" data-hover-preview>
+              <video src="assets/video/sticker-holo-hand.mp4" poster="assets/img/shop/sticker-holo-hand-poster.jpg"
+                     muted loop playsinline preload="none"
+                     aria-label="Video: the holographic sticker turning in the light"></video>
+            </figure>
+            <div class="shop-dots" role="group" aria-label="Product views">
+              <button type="button" aria-pressed="true" aria-label="View 1 of 3: on a laptop">01</button>
+              <button type="button" aria-pressed="false" aria-label="View 2 of 3: in hand">02</button>
+              <button type="button" aria-pressed="false" aria-label="View 3 of 3: video">03</button>
+            </div>
+          </div>
+          <div class="term-body shop-body">
+            <span class="card-tag tag-red">// PRINT</span>
+            <h3 class="shop-name">Magi Holographic Sticker</h3>
+            <ul class="shop-options" aria-label="Details">
+              <li>2.5&Prime; &times; 1&Prime;</li><li>holographic</li><li>glossy</li>
+            </ul>
+            <div class="shop-buy">
+              <span class="shop-price">$6</span>
+              <div class="shop-cta-mount" data-shopify-product="15410306285932">
+                <a class="shop-cta" href="https://xcqc4a-1a.myshopify.com/cart/67654714786156:1">[ buy now ]</a>
+              </div>
+            </div>
+          </div>
+        </article>
+      </li>
+
+      <li>
         <article class="deck-card shop-card" id="tees" aria-labelledby="tees-name">
           <header class="card-head accent-blue">
-            <span class="card-idx">01</span>
+            <span class="card-idx">02</span>
             <h2 class="card-name" id="tees-name">T-SHIRTS</h2>
             <span class="card-rail" aria-hidden="true"></span>
             <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -74,32 +123,6 @@
             <ul class="shop-options" aria-label="Sizes">
               <li>S</li><li>M</li><li>L</li><li>XL</li><li>XXL</li>
             </ul>
-          </div>
-        </article>
-      </li>
-
-      <li>
-        <article class="deck-card shop-card" id="stickers" aria-labelledby="stickers-name">
-          <header class="card-head accent-red">
-            <span class="card-idx">02</span>
-            <h2 class="card-name" id="stickers-name">STICKERS</h2>
-            <span class="card-rail" aria-hidden="true"></span>
-            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
-          </header>
-          <div class="shop-media has-photo">
-            <img src="assets/img/shop/sticker-white-holo.jpg" width="922" height="1152" loading="lazy"
-                 alt="The white holographic magi sticker on a laptop palm rest">
-          </div>
-          <div class="term-body shop-body">
-            <span class="card-tag tag-red">// PRINT</span>
-            <h3 class="shop-name">White Holographic Sticker</h3>
-            <ul class="shop-options" aria-label="Details">
-              <li>2.5&Prime; &times; 1&Prime;</li><li>holographic</li><li>glossy</li>
-            </ul>
-            <div class="shop-buy">
-              <span class="shop-price">$6</span>
-              <button class="shop-cta" type="button" disabled>[ dropping soon ]</button>
-            </div>
           </div>
         </article>
       </li>
@@ -125,7 +148,6 @@
           </div>
         </article>
       </li>
-
     </ul>
 
     <p class="shop-note">Want something before it drops? <a href="index.html#contact">Write to the founders &nearr;</a></p>
@@ -138,7 +160,8 @@
   <span class="footer-links"><a href="mailto:shakerzaman@gmail.com">shakerzaman@gmail.com</a></span>
 </footer>
 
-<script src="js/shop.js?v=20260925a"></script>
+<script src="js/shop.js?v=20261010b"></script>
+<script src="js/shop-buy.js?v=20261010d"></script>
 <script src="js/header-pill.js?v=20260927b"></script>
 </body>
 </html>
