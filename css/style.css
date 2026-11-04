@@ -788,6 +788,13 @@ a { color: inherit; }
   border-top: 1px solid var(--border);
   color: var(--text-dim);
   font-size: 12px;
+  gap: 8px 24px;
+  flex-wrap: wrap;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
 }
 
 /* ---------- responsive ---------- */
