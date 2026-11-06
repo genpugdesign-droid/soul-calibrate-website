@@ -1,0 +1,30 @@
+name: CTA v2 switch (2026-11-10 01:00 Toronto)
+
+# One-shot: at 06:00 UTC on 2026-11-10 (01:00 EST) swap the hero button to the app link, commit, push
+# (GitHub Pages rebuilds from main), and remove this workflow. Manual fallback: "Run workflow" or
+# `gh workflow run cta-v2-20261110.yml`.
+on:
+  schedule:
+    - cron: '0 6 10 11 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  switch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch the call to action and push
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%F)" != "2026-11-10" ]; then
+            echo "scheduled run on another day; nothing to do"; exit 0
+          fi
+          bash scripts/cta_v2_switch.sh
+          git rm -q .github/workflows/cta-v2-20261110.yml
+          git config user.name "magi-site-bot"
+          git config user.email "ops@magivision.io"
+          git add index.html
+          git commit -m "CTA v2: hero button links to app.magivision.io (scheduled 2026-11-10 01:00 Toronto)"
+          git push origin HEAD:main
