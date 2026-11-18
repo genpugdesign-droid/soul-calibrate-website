@@ -277,3 +277,108 @@ a.shop-cta:hover, a.shop-cta:focus-visible { color: var(--bg); background: var(-
 /* Keep the floating cart tab on screen even with an empty cart; Shopify only
    shows it once something is added. */
 body .shopify-buy-frame--toggle.is-sticky { display: block; }
+
+/* ── apparel: size picker ─────────────────────────────────────────────────────
+   A mount with data-shopify-options gets the Buy Button's variant <select>s
+   next to its add-to-cart. Price sits on its own line above them. */
+.shop-buy--options { flex-wrap: wrap; }
+.shop-buy--options .shop-cta-mount { flex: 1 1 100%; }
+.shop-cta-mount .shopify-buy__product { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.shop-cta-mount .shopify-buy__option-select { margin: 0; flex: 1 1 110px; min-width: 0; }
+.shop-cta-mount .shopify-buy__option-select__label {
+  display: block;
+  margin-bottom: 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.shop-cta-mount .shopify-buy__option-select-wrapper { position: relative; border: 0; }
+.shop-cta-mount .shopify-buy__option-select__select {
+  width: 100%;
+  padding: 8px 28px 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.shop-cta-mount .shopify-buy__option-select__select:hover,
+.shop-cta-mount .shopify-buy__option-select__select:focus-visible { border-color: var(--blue-dim); outline: none; }
+.shop-cta-mount .shopify-buy__select-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 10px;
+  margin-top: -3px;
+  fill: var(--text-dim);
+  pointer-events: none;
+}
+.shop-cta-mount .shopify-buy__btn-wrapper { flex: 0 0 auto; }
+
+/* Without the SDK: one checkout link per size. */
+.shop-cta-sizes { display: flex; flex-wrap: wrap; gap: 6px; }
+.shop-cta-sizes .shop-cta { min-width: 40px; text-align: center; }
+
+/* Product shots on white: keep the whole garment in frame. */
+.shop-media--flat { background: #fff; }
+.shop-media--flat.has-photo img { object-fit: contain; object-position: 50% 50%; }
+/* A picker with a single choice (Color: Vintage Black) says nothing; the
+   details chips already name the colour. */
+.shop-cta-mount .shopify-buy__option-select:has(select option:only-child) { display: none; }
+
+/* ── description + size chart disclosures ───────────────────────────────────── */
+.shop-details { margin-top: 18px; border-top: 1px dashed var(--border-strong); }
+.shop-more { border-bottom: 1px dashed var(--border-strong); }
+.shop-more summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  cursor: pointer;
+  list-style: none;
+}
+.shop-more summary::-webkit-details-marker { display: none; }
+.shop-more summary::before { content: '// '; color: var(--blue-dim); }
+.shop-more summary::after { content: '[ + ]'; margin-left: auto; color: var(--blue-dim); }
+.shop-more[open] summary::after { content: '[ \2212 ]'; }
+.shop-more summary:hover,
+.shop-more summary:focus-visible { color: var(--text); outline: none; }
+.shop-more summary:hover::after,
+.shop-more summary:focus-visible::after { color: var(--blue); }
+.shop-more-body { padding: 0 0 14px; }
+.shop-card .shop-more-body p { margin: 0 0 10px; font-size: 0.8rem; }
+.shop-card .shop-more-body p:last-child { margin-bottom: 0; }
+
+.shop-size-chart { overflow-x: auto; }
+.shop-size-chart table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  white-space: nowrap;
+  color: var(--text-dim);
+}
+.shop-size-chart th,
+.shop-size-chart td { padding: 6px 6px; text-align: right; border-bottom: 1px solid var(--border); }
+.shop-size-chart th { font-weight: 500; color: var(--text); }
+.shop-size-chart tbody tr th:first-child { text-align: left; text-transform: lowercase; color: var(--text-dim); }
+.shop-size-chart thead th {
+  text-align: left;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  border-bottom-color: var(--border-strong);
+}
