@@ -382,3 +382,6 @@ body .shopify-buy-frame--toggle.is-sticky { display: block; }
   color: var(--blue);
   border-bottom-color: var(--border-strong);
 }
+
+/* Deep links (/shop#zip-up) land below the fixed header pill. */
+.shop-card { scroll-margin-top: 96px; }
