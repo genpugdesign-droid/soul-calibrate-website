@@ -117,41 +117,39 @@ window.addEventListener('scroll', () => {
   });
 })();
 
-// Description / size chart disclosures ease open and shut instead of
-// snapping, so the card (and its row) grows smoothly. The <details> keeps
-// working natively; this only animates the body's height around the toggle.
-(function easeDisclosures() {
+// Description / size chart pop-up. Each apparel card's [ details ] button
+// opens its <dialog> as a modal; it eases in and out, and closes on the
+// close button, Escape, or a tap on the dimmed backdrop. Focus returns to
+// the button that opened it.
+(function detailsModal() {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced || !Element.prototype.animate) return;
-  const EASE = { duration: 320, easing: 'cubic-bezier(0.42, 0, 0.58, 1)' }; // ease-in-out
+  document.querySelectorAll('.shop-details').forEach((box) => {
+    const open = box.querySelector('.shop-more-btn');
+    const dialog = box.querySelector('.shop-modal');
+    if (!open || !dialog || typeof dialog.showModal !== 'function') return;
 
-  document.querySelectorAll('.shop-more').forEach((box) => {
-    const summary = box.querySelector('summary');
-    const body = box.querySelector('.shop-more-body');
-    if (!summary || !body) return;
-    let anim = null;
-
-    const run = (from, to, done) => {
-      if (anim) anim.cancel();
-      body.style.overflow = 'hidden';
-      // the body's bottom padding eases with it, or it snaps at the closed end
-      const pad = getComputedStyle(body).paddingBottom;
-      const frame = (h) => ({ height: h + 'px', paddingBottom: h ? pad : '0px', opacity: h ? 1 : 0 });
-      anim = body.animate([frame(from), frame(to)], EASE);
-      anim.onfinish = () => { anim = null; body.style.overflow = ''; if (done) done(); };
+    const close = () => {
+      if (!dialog.open || dialog.classList.contains('is-closing')) return;
+      if (reduced) { dialog.close(); return; }
+      dialog.classList.add('is-closing');
+      const done = () => { dialog.classList.remove('is-closing'); dialog.close(); };
+      dialog.addEventListener('animationend', done, { once: true });
+      setTimeout(() => { if (dialog.classList.contains('is-closing')) done(); }, 400);
     };
 
-    summary.addEventListener('click', (e) => {
-      e.preventDefault();
-      const current = body.getBoundingClientRect().height;
-      if (!box.open || box.dataset.closing) {
-        delete box.dataset.closing;
-        box.open = true;
-        run(anim ? current : 0, body.scrollHeight);
-      } else {
-        box.dataset.closing = '1';
-        run(current, 0, () => { box.open = false; delete box.dataset.closing; });
-      }
+    open.addEventListener('click', () => {
+      dialog.showModal();
+      dialog.scrollTop = 0;
+      document.documentElement.classList.add('shop-modal-open');
     });
+    dialog.addEventListener('close', () => {
+      document.documentElement.classList.remove('shop-modal-open');
+      open.focus({ preventScroll: true });
+    });
+    dialog.querySelector('.shop-modal-close').addEventListener('click', close);
+    // Escape: run the eased close instead of the instant one
+    dialog.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
+    // a click that lands on the dialog itself (not its frame) is the backdrop
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) close(); });
   });
 })();

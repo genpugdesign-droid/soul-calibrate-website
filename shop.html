@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20261104a">
 <link rel="stylesheet" href="css/header-pill.css?v=20260927c">
-<link rel="stylesheet" href="css/shop.css?v=20261118b">
+<link rel="stylesheet" href="css/shop.css?v=20261118c">
 </head>
 <body class="shop-page">
 
@@ -138,31 +138,48 @@
             <!-- Description and size chart come from the Shopify listing
                  (js/shop-buy.js refreshes them live); this copy shows if
                  Shopify can't be reached. -->
+            <!-- Description and size chart open in a pop-up. The copy comes
+                 from the Shopify listing (js/shop-buy.js refreshes it live);
+                 this copy shows if Shopify can't be reached. -->
             <div class="shop-details" data-shopify-details="15501344768364">
-              <details class="shop-more">
-                <summary>description</summary>
-                <div class="shop-more-body" data-shopify-description>
-                  <p>Heavyweight boxy-fit zip hoodie with brushed-fleece interior for comfort. Washed snow-dye finish delivers a worn-in vintage look. Oversized drop shoulders layer easily, while the zip front shifts from closed to open styling for fall/winter streetwear.</p>
-                  <p>Front design is printed directly on the zipper. See Clearly, Move Simply. Waste Nothing.</p>
-                  <p>Back Design: The first record of grappling, was written on a tomb wall, the next one is Magi.</p>
-                  <p>400GSM Unisex Vintage-Wash Boxy-Fit Zip-Up Hoodie</p>
+              <button type="button" class="shop-more-btn" aria-haspopup="dialog" aria-controls="zip-up-modal">[ details<span class="shop-more-extra"> + size chart</span> ]</button>
+              <dialog class="shop-modal" id="zip-up-modal" aria-labelledby="zip-up-modal-name">
+                <div class="shop-modal-frame">
+                  <header class="shop-modal-head">
+                    <span class="card-tag tag-blue">// APPAREL</span>
+                    <button type="button" class="shop-modal-close" aria-label="Close details">[ &times; ]</button>
+                  </header>
+                  <div class="shop-modal-grid">
+                    <div class="shop-modal-photo">
+                      <img src="assets/img/shop/zip-hoodie-1.jpg" width="1200" height="1200" loading="lazy" alt="Front of the zip-up hoodie">
+                    </div>
+                    <div class="shop-modal-info">
+                      <h2 class="shop-modal-name" id="zip-up-modal-name">Magi Vision Zip-Up Hoodie</h2>
+                      <span class="shop-modal-price">$70</span>
+                      <h3 class="shop-modal-label">description</h3>
+                      <div class="shop-modal-desc" data-shopify-description>
+                        <p>Heavyweight boxy-fit zip hoodie with brushed-fleece interior for comfort. Washed snow-dye finish delivers a worn-in vintage look. Oversized drop shoulders layer easily, while the zip front shifts from closed to open styling for fall/winter streetwear.</p>
+                        <p>Front design is printed directly on the zipper. See Clearly, Move Simply. Waste Nothing.</p>
+                        <p>Back Design: The first record of grappling, was written on a tomb wall, the next one is Magi.</p>
+                        <p>400GSM Unisex Vintage-Wash Boxy-Fit Zip-Up Hoodie</p>
+                      </div>
+                      <h3 class="shop-modal-label">size chart</h3>
+                      <div class="shop-size-chart" data-shopify-sizechart>
+                        <table>
+                          <thead><tr><th colspan="6">imperial &middot; inches</th></tr></thead>
+                          <tbody>
+                            <tr><th></th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th></tr>
+                            <tr><th>chest</th><td>27.56</td><td>28.35</td><td>29.13</td><td>29.92</td><td>30.71</td></tr>
+                            <tr><th>length</th><td>24.80</td><td>25.59</td><td>26.38</td><td>27.17</td><td>27.95</td></tr>
+                            <tr><th>Shoulder</th><td>24.41</td><td>25.20</td><td>25.98</td><td>26.77</td><td>27.56</td></tr>
+                            <tr><th>Sleeve length</th><td>20.87</td><td>21.26</td><td>21.65</td><td>22.05</td><td>22.44</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </details>
-              <details class="shop-more">
-                <summary>size chart</summary>
-                <div class="shop-more-body shop-size-chart" data-shopify-sizechart>
-                  <table>
-                    <thead><tr><th colspan="6">imperial &middot; inches</th></tr></thead>
-                    <tbody>
-                      <tr><th></th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th></tr>
-                      <tr><th>chest</th><td>27.56</td><td>28.35</td><td>29.13</td><td>29.92</td><td>30.71</td></tr>
-                      <tr><th>length</th><td>24.80</td><td>25.59</td><td>26.38</td><td>27.17</td><td>27.95</td></tr>
-                      <tr><th>Shoulder</th><td>24.41</td><td>25.20</td><td>25.98</td><td>26.77</td><td>27.56</td></tr>
-                      <tr><th>Sleeve length</th><td>20.87</td><td>21.26</td><td>21.65</td><td>22.05</td><td>22.44</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </details>
+              </dialog>
             </div>
             <div class="shop-buy shop-buy--options">
               <span class="shop-price">$70</span>
@@ -208,28 +225,45 @@
             <!-- Description and size chart come from the Shopify listing
                  (js/shop-buy.js refreshes them live); this copy shows if
                  Shopify can't be reached. -->
+            <!-- Description and size chart open in a pop-up. The copy comes
+                 from the Shopify listing (js/shop-buy.js refreshes it live);
+                 this copy shows if Shopify can't be reached. -->
             <div class="shop-details" data-shopify-details="15502945878380">
-              <details class="shop-more">
-                <summary>description</summary>
-                <div class="shop-more-body" data-shopify-description>
-                  <p>380GSM unisex heavyweight cotton long-sleeve with a crisp, structured fit and premium hand-feel. Timeless black base works for minimalist styling or bold custom prints. Built for cooler-season layering, daily wear, and brand drops.</p>
+              <button type="button" class="shop-more-btn" aria-haspopup="dialog" aria-controls="crewneck-modal">[ details<span class="shop-more-extra"> + size chart</span> ]</button>
+              <dialog class="shop-modal" id="crewneck-modal" aria-labelledby="crewneck-modal-name">
+                <div class="shop-modal-frame">
+                  <header class="shop-modal-head">
+                    <span class="card-tag tag-blue">// APPAREL</span>
+                    <button type="button" class="shop-modal-close" aria-label="Close details">[ &times; ]</button>
+                  </header>
+                  <div class="shop-modal-grid">
+                    <div class="shop-modal-photo">
+                      <img src="assets/img/shop/crewneck-1.jpg" width="1200" height="1200" loading="lazy" alt="Front of the crewneck sweatshirt">
+                    </div>
+                    <div class="shop-modal-info">
+                      <h2 class="shop-modal-name" id="crewneck-modal-name">Magi Vision Crewneck Sweatshirt</h2>
+                      <span class="shop-modal-price">$60</span>
+                      <h3 class="shop-modal-label">description</h3>
+                      <div class="shop-modal-desc" data-shopify-description>
+                        <p>380GSM unisex heavyweight cotton long-sleeve with a crisp, structured fit and premium hand-feel. Timeless black base works for minimalist styling or bold custom prints. Built for cooler-season layering, daily wear, and brand drops.</p>
+                      </div>
+                      <h3 class="shop-modal-label">size chart</h3>
+                      <div class="shop-size-chart" data-shopify-sizechart>
+                        <table>
+                          <thead><tr><th colspan="5">imperial &middot; inches</th></tr></thead>
+                          <tbody>
+                            <tr><th></th><th>S</th><th>M</th><th>L</th><th>XL</th></tr>
+                            <tr><th>chest</th><td>25.20</td><td>25.98</td><td>26.77</td><td>27.56</td></tr>
+                            <tr><th>length</th><td>26.77</td><td>27.56</td><td>28.35</td><td>29.53</td></tr>
+                            <tr><th>Shoulder</th><td>22.83</td><td>23.62</td><td>24.41</td><td>25.20</td></tr>
+                            <tr><th>Sleeve length</th><td>21.65</td><td>22.05</td><td>22.44</td><td>22.83</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </details>
-              <details class="shop-more">
-                <summary>size chart</summary>
-                <div class="shop-more-body shop-size-chart" data-shopify-sizechart>
-                  <table>
-                    <thead><tr><th colspan="5">imperial &middot; inches</th></tr></thead>
-                    <tbody>
-                      <tr><th></th><th>S</th><th>M</th><th>L</th><th>XL</th></tr>
-                      <tr><th>chest</th><td>25.20</td><td>25.98</td><td>26.77</td><td>27.56</td></tr>
-                      <tr><th>length</th><td>26.77</td><td>27.56</td><td>28.35</td><td>29.53</td></tr>
-                      <tr><th>Shoulder</th><td>22.83</td><td>23.62</td><td>24.41</td><td>25.20</td></tr>
-                      <tr><th>Sleeve length</th><td>21.65</td><td>22.05</td><td>22.44</td><td>22.83</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </details>
+              </dialog>
             </div>
             <div class="shop-buy shop-buy--options">
               <span class="shop-price">$60</span>
@@ -299,7 +333,7 @@
   <span class="footer-links"><a href="mailto:shaker@magivision.io">shaker@magivision.io</a><a href="mailto:gpug@magivision.io">gpug@magivision.io</a></span>
 </footer>
 
-<script src="js/shop.js?v=20261118b"></script>
+<script src="js/shop.js?v=20261118c"></script>
 <script src="js/shop-buy.js?v=20261118a"></script>
 <script src="js/header-pill.js?v=20260927b"></script>
 </body>

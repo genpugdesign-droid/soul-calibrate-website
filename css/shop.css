@@ -329,33 +329,118 @@ body .shopify-buy-frame--toggle.is-sticky { display: block; }
    details chips already name the colour. */
 .shop-cta-mount .shopify-buy__option-select:has(select option:only-child) { display: none; }
 
-/* ── description + size chart disclosures ───────────────────────────────────── */
-.shop-details { margin-top: 18px; border-top: 1px dashed var(--border-strong); }
-.shop-more { border-bottom: 1px dashed var(--border-strong); }
-.shop-more summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
+/* ── details pop-up ────────────────────────────────────────────────────────────
+   Apparel cards carry one [ details ] button; the description and size chart
+   open in a modal <dialog> (js/shop.js) so the card itself stays short. */
+.shop-details { margin-top: 16px; }
+.shop-more-btn {
+  width: 100%;
+  padding: 9px 10px;
   font-family: var(--font-mono);
   font-size: 10px;
+  font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-dim);
+  background: transparent;
+  border: 1px dashed var(--border-strong);
   cursor: pointer;
-  list-style: none;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
-.shop-more summary::-webkit-details-marker { display: none; }
-.shop-more summary::before { content: '// '; color: var(--blue-dim); }
-.shop-more summary::after { content: '[ + ]'; margin-left: auto; color: var(--blue-dim); }
-.shop-more[open] summary::after { content: '[ \2212 ]'; }
-.shop-more summary:hover,
-.shop-more summary:focus-visible { color: var(--text); outline: none; }
-.shop-more summary:hover::after,
-.shop-more summary:focus-visible::after { color: var(--blue); }
-.shop-more-body { padding: 0 0 14px; }
-.shop-card .shop-more-body p { margin: 0 0 10px; font-size: 0.8rem; }
-.shop-card .shop-more-body p:last-child { margin-bottom: 0; }
+.shop-more-btn:hover,
+.shop-more-btn:focus-visible { color: var(--blue); border-color: var(--blue-dim); outline: none; }
+
+html.shop-modal-open { overflow: hidden; }
+.shop-modal {
+  width: min(860px, calc(100% - 32px));
+  max-width: none;
+  max-height: min(86vh, 760px);
+  padding: 0;
+  overflow: auto;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  overscroll-behavior: contain;
+  animation: shop-modal-in 0.32s cubic-bezier(0.42, 0, 0.58, 1) both;
+}
+.shop-modal::backdrop {
+  background: rgba(3, 3, 4, 0.78);
+  backdrop-filter: blur(3px);
+  animation: shop-fade-in 0.32s ease-in-out both;
+}
+.shop-modal.is-closing { animation: shop-modal-out 0.26s cubic-bezier(0.42, 0, 0.58, 1) both; }
+.shop-modal.is-closing::backdrop { animation: shop-fade-out 0.26s ease-in-out both; }
+@keyframes shop-modal-in  { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes shop-modal-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(14px) scale(0.98); } }
+@keyframes shop-sheet-in  { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes shop-sheet-out { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes shop-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shop-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .shop-modal, .shop-modal::backdrop { animation: none !important; }
+}
+
+/* the deck card's notched frame, at modal size */
+.shop-modal-frame {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  clip-path: polygon(
+    14px 0, calc(100% - 14px) 0, calc(100% - 14px) 14px, 100% 14px,
+    100% calc(100% - 14px), calc(100% - 14px) calc(100% - 14px),
+    calc(100% - 14px) 100%, 14px 100%, 14px calc(100% - 14px),
+    0 calc(100% - 14px), 0 14px, 14px 14px);
+}
+.shop-modal-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.shop-modal-close {
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+}
+.shop-modal-close:hover,
+.shop-modal-close:focus-visible { color: var(--bg); background: var(--blue); border-color: var(--blue); outline: none; }
+
+.shop-modal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 28px;
+  padding: 24px;
+}
+.shop-modal-photo { background: #fff; aspect-ratio: 1 / 1; }
+.shop-modal-photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.shop-modal-name { margin: 0 0 6px; font-size: 1.25rem; font-weight: 600; line-height: 1.25; color: var(--text); }
+.shop-modal-price { font-family: var(--font-mono); font-size: 1.05rem; color: var(--text); }
+.shop-modal-label {
+  margin: 22px 0 10px;
+  padding-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  border-top: 1px dashed var(--border-strong);
+}
+.shop-modal-label::before { content: '// '; color: var(--blue-dim); }
+.shop-modal-head .card-tag { margin: 0; }
+.shop-modal .shop-modal-desc p { margin: 0 0 10px; font-size: 0.85rem; line-height: 1.6; color: var(--text-dim); }
+.shop-modal .shop-modal-desc p:last-child { margin-bottom: 0; }
 
 .shop-size-chart { overflow-x: auto; }
 .shop-size-chart table {
@@ -422,14 +507,21 @@ body .shopify-buy-frame--toggle.is-sticky { display: block; }
   .shop-card .shop-options { display: none; }
   .shop-name { margin: 0 0 4px; font-size: 10.5px; line-height: 1.25; }
 
-  .shop-details { margin-top: 6px; }
-  .shop-more summary { padding: 7px 0; font-size: 8px; letter-spacing: 0.06em; }
-  .shop-more summary::before { content: none; }
-  .shop-more summary::after { content: '+'; }
-  .shop-more[open] summary::after { content: '\2212'; }
-  .shop-card .shop-more-body p { font-size: 10px; line-height: 1.45; }
-  .shop-size-chart table { font-size: 9px; }
-  .shop-size-chart th, .shop-size-chart td { padding: 4px 3px; }
+  .shop-details { margin-top: 8px; }
+  .shop-more-btn { padding: 7px 2px; font-size: 8.5px; letter-spacing: 0.04em; }
+  .shop-more-extra { display: none; }
+  /* the pop-up becomes a sheet that rises from the bottom of the screen */
+  .shop-modal { width: 100%; max-width: none; max-height: 88dvh; margin: auto 0 0; }
+  .shop-modal-frame { clip-path: none; border-left: 0; border-right: 0; border-bottom: 0; }
+  .shop-modal .card-tag { display: inline-block; }
+  .shop-modal-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; }
+  .shop-modal-photo { width: 132px; }
+  .shop-modal-name { font-size: 1rem; }
+  .shop-modal .shop-modal-desc p { font-size: 0.8rem; line-height: 1.55; }
+  .shop-modal .shop-size-chart table { font-size: 10px; }
+  .shop-modal .shop-size-chart th, .shop-modal .shop-size-chart td { padding: 6px 4px; }
+  .shop-modal[open] { animation-name: shop-sheet-in; }
+  .shop-modal.is-closing { animation-name: shop-sheet-out; }
 
   .shop-buy { padding-top: 10px; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 6px; }
   .shop-buy .shop-cta-mount { flex: none; }
