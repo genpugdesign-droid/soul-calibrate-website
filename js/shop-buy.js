@@ -120,8 +120,14 @@
     const client = window.ShopifyBuy.buildClient(SHOP);
     window.ShopifyBuy.UI.onReady(client).then((ui) => {
       mounts.forEach((node) => {
-        const fallback = node.querySelector('.shop-cta');
+        // Fallback: one cart link, or a row of per-size links for apparel.
+        const fallback = node.querySelector('.shop-cta-sizes') || node.querySelector('.shop-cta');
+        // A mount marked data-shopify-options also gets the SDK's variant
+        // pickers (size); styled in css/shop.css.
+        const contents = Object.assign({}, options.product.contents,
+          'shopifyOptions' in node.dataset ? { options: true } : {});
         const product = Object.assign({}, options.product, {
+          contents,
           events: {
             afterRender: () => { if (fallback) fallback.remove(); },
             addVariantToCart: () => celebrate(node),
