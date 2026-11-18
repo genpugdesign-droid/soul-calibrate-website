@@ -137,6 +137,13 @@
             if (t) paras.push(t);
           });
         });
+        // Some listings are bare text before the table, with no <p> at all.
+        if (!paras.length) {
+          const loose = doc.body.cloneNode(true);
+          loose.querySelectorAll('table').forEach((t) => t.remove());
+          const t = loose.textContent.trim();
+          if (t) paras.push(t);
+        }
         if (descBox && paras.length) {
           descBox.replaceChildren(...paras.map((t) => {
             const el = document.createElement('p');

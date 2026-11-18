@@ -213,10 +213,6 @@ a.shop-cta:hover, a.shop-cta:focus-visible { color: var(--bg); background: var(-
 @media (max-width: 1080px) {
   .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 680px) {
-  .shop { padding: 96px 6vw 72px; }
-  .shop-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
-}
 
 /* Add-to-cart feedback (js/shop-buy.js celebrate): the button flashes, sparks
    burst off it, and "thank you!" floats up and fades. */
@@ -385,3 +381,70 @@ body .shopify-buy-frame--toggle.is-sticky { display: block; }
 
 /* Deep links (/shop#zip-up) land below the fixed header pill. */
 .shop-card { scroll-margin-top: 96px; }
+
+/* Phones: three across, so everything on sale shows at once. Each card keeps
+   the photo, name, price, size and add-to-cart; the tagline and chips drop
+   out, and the description / size chart stay behind their disclosures. */
+@media (max-width: 680px) {
+  .shop { padding: 96px 16px 72px; }
+  .shop-head { margin-bottom: 28px; }
+  .shop-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
+  .shop-grid .deck-card {
+    clip-path: polygon(
+      8px 0, calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+      100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px),
+      calc(100% - 8px) 100%, 8px 100%, 8px calc(100% - 8px),
+      0 calc(100% - 8px), 0 8px, 8px 8px);
+  }
+  .shop-grid .deck-card::before { inset: 3px; clip-path: none; }
+  .shop-card .card-head { margin: 4px 4px 0; padding: 6px 6px; gap: 5px; }
+  .shop-card .card-head::after { left: 6px; width: 22px; }
+  .shop-card .card-idx { font-size: 8px; padding: 1px 3px; letter-spacing: 0.06em; }
+  .shop-card .card-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+    text-indent: 0;
+  }
+  .shop-card .card-rail,
+  .shop-card .card-marks { display: none; }
+
+  .shop-media { margin: 0 4px; }
+  .shop-dots { left: 4px; bottom: 4px; gap: 2px; }
+  .shop-dots button { padding: 2px 4px; font-size: 8px; letter-spacing: 0.04em; }
+
+  .shop-body { padding: 9px 7px 10px; }
+  .shop-card .card-tag,
+  .shop-card .shop-body > p,
+  .shop-card .shop-options { display: none; }
+  .shop-name { margin: 0 0 4px; font-size: 10.5px; line-height: 1.25; }
+
+  .shop-details { margin-top: 6px; }
+  .shop-more summary { padding: 7px 0; font-size: 8px; letter-spacing: 0.06em; }
+  .shop-more summary::before { content: none; }
+  .shop-more summary::after { content: '+'; }
+  .shop-more[open] summary::after { content: '\2212'; }
+  .shop-card .shop-more-body p { font-size: 10px; line-height: 1.45; }
+  .shop-size-chart table { font-size: 9px; }
+  .shop-size-chart th, .shop-size-chart td { padding: 4px 3px; }
+
+  .shop-buy { padding-top: 10px; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 6px; }
+  .shop-buy .shop-cta-mount { flex: none; }
+  .shop-price { font-size: 13px; }
+  .shop-cta-mount .shopify-buy__product { flex-direction: column; align-items: stretch; gap: 6px; }
+  .shop-cta-mount .shopify-buy__option-select { flex: none; }
+  .shop-cta-mount .shopify-buy__option-select__label { margin-bottom: 3px; font-size: 8px; }
+  .shop-cta-mount .shopify-buy__option-select__select { padding: 7px 18px 7px 6px; font-size: 10px; }
+  .shop-cta-mount .shopify-buy__select-icon { right: 6px; width: 8px; }
+  .shop-cta-mount .shopify-buy__btn,
+  .shop-cta { width: 100%; padding: 8px 2px; font-size: 8.5px; letter-spacing: 0.04em; white-space: normal; }
+  .shop-cta-sizes { gap: 3px; }
+  .shop-cta-sizes .shop-cta { flex: 1 1 26px; min-width: 0; width: auto; padding: 7px 0; }
+
+  .shop-media .signal-box { padding: 6px; }
+  .shop-media .placeholder-label { font-size: 9px; }
+  .shop-media .placeholder-sub { display: none; }
+}

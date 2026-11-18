@@ -116,3 +116,42 @@ window.addEventListener('scroll', () => {
     }
   });
 })();
+
+// Description / size chart disclosures ease open and shut instead of
+// snapping, so the card (and its row) grows smoothly. The <details> keeps
+// working natively; this only animates the body's height around the toggle.
+(function easeDisclosures() {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || !Element.prototype.animate) return;
+  const EASE = { duration: 320, easing: 'cubic-bezier(0.42, 0, 0.58, 1)' }; // ease-in-out
+
+  document.querySelectorAll('.shop-more').forEach((box) => {
+    const summary = box.querySelector('summary');
+    const body = box.querySelector('.shop-more-body');
+    if (!summary || !body) return;
+    let anim = null;
+
+    const run = (from, to, done) => {
+      if (anim) anim.cancel();
+      body.style.overflow = 'hidden';
+      // the body's bottom padding eases with it, or it snaps at the closed end
+      const pad = getComputedStyle(body).paddingBottom;
+      const frame = (h) => ({ height: h + 'px', paddingBottom: h ? pad : '0px', opacity: h ? 1 : 0 });
+      anim = body.animate([frame(from), frame(to)], EASE);
+      anim.onfinish = () => { anim = null; body.style.overflow = ''; if (done) done(); };
+    };
+
+    summary.addEventListener('click', (e) => {
+      e.preventDefault();
+      const current = body.getBoundingClientRect().height;
+      if (!box.open || box.dataset.closing) {
+        delete box.dataset.closing;
+        box.open = true;
+        run(anim ? current : 0, body.scrollHeight);
+      } else {
+        box.dataset.closing = '1';
+        run(current, 0, () => { box.open = false; delete box.dataset.closing; });
+      }
+    });
+  });
+})();
