@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20261104a">
 <link rel="stylesheet" href="css/header-pill.css?v=20260927c">
-<link rel="stylesheet" href="css/shop.css?v=20261118a">
+<link rel="stylesheet" href="css/shop.css?v=20261118b">
 </head>
 <body class="shop-page">
 
@@ -175,9 +175,76 @@
       </li>
 
       <li>
-        <article class="deck-card shop-card" id="tees" aria-labelledby="tees-name">
+        <article class="deck-card shop-card" id="crewneck" aria-labelledby="crewneck-name">
           <header class="card-head accent-blue">
             <span class="card-idx">03</span>
+            <h2 class="card-name" id="crewneck-name">CREWNECK</h2>
+            <span class="card-rail" aria-hidden="true"></span>
+            <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
+          </header>
+          <!-- Front first; hovering previews the back print until a number is
+               picked. Photos are the Shopify product images. -->
+          <div class="shop-media has-photo shop-gallery shop-media--flat">
+            <figure class="shop-slide is-active">
+              <img src="assets/img/shop/crewneck-1.jpg" width="1200" height="1200"
+                   alt="Front of the Magi Vision crewneck sweatshirt in snow-wash black: a glowing blue magi logo with see clearly, move simply, waste nothing">
+            </figure>
+            <figure class="shop-slide" data-hover-preview>
+              <img src="assets/img/shop/crewneck-2.jpg" width="1200" height="1200" loading="lazy"
+                   alt="Back of the crewneck: a large glowing blue magi pentacle with the line: the first record of grappling was written on a tomb wall, the next one is magi">
+            </figure>
+            <div class="shop-dots" role="group" aria-label="Product views">
+              <button type="button" aria-pressed="true" aria-label="View 1 of 2: front">01</button>
+              <button type="button" aria-pressed="false" aria-label="View 2 of 2: back">02</button>
+            </div>
+          </div>
+          <div class="term-body shop-body">
+            <span class="card-tag tag-blue">// APPAREL</span>
+            <h3 class="shop-name">Magi Vision Crewneck Sweatshirt</h3>
+            <p>See clearly. Move simply. Waste nothing.</p>
+            <ul class="shop-options" aria-label="Details">
+              <li>snow wash</li><li>loopback cotton</li><li>front + back print</li>
+            </ul>
+            <!-- Description and size chart come from the Shopify listing
+                 (js/shop-buy.js refreshes them live); this copy shows if
+                 Shopify can't be reached. -->
+            <div class="shop-details" data-shopify-details="15502945878380">
+              <details class="shop-more">
+                <summary>description</summary>
+                <div class="shop-more-body" data-shopify-description>
+                  <p>380GSM unisex heavyweight cotton long-sleeve with a crisp, structured fit and premium hand-feel. Timeless black base works for minimalist styling or bold custom prints. Built for cooler-season layering, daily wear, and brand drops.</p>
+                </div>
+              </details>
+              <details class="shop-more">
+                <summary>size chart</summary>
+                <div class="shop-more-body shop-size-chart" data-shopify-sizechart>
+                  <table>
+                    <thead><tr><th colspan="5">imperial &middot; inches</th></tr></thead>
+                    <tbody>
+                      <tr><th></th><th>S</th><th>M</th><th>L</th><th>XL</th></tr>
+                      <tr><th>chest</th><td>25.20</td><td>25.98</td><td>26.77</td><td>27.56</td></tr>
+                      <tr><th>length</th><td>26.77</td><td>27.56</td><td>28.35</td><td>29.53</td></tr>
+                      <tr><th>Shoulder</th><td>22.83</td><td>23.62</td><td>24.41</td><td>25.20</td></tr>
+                      <tr><th>Sleeve length</th><td>21.65</td><td>22.05</td><td>22.44</td><td>22.83</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+            <div class="shop-buy shop-buy--options">
+              <span class="shop-price">$60</span>
+              <div class="shop-cta-mount" data-shopify-product="15502945878380" data-shopify-options>
+                <div class="shop-cta-sizes"><a class="shop-cta" href="https://xcqc4a-1a.myshopify.com/cart/68225753022828:1" aria-label="Buy size S">S</a><a class="shop-cta" href="https://xcqc4a-1a.myshopify.com/cart/68225753055596:1" aria-label="Buy size M">M</a><a class="shop-cta" href="https://xcqc4a-1a.myshopify.com/cart/68225753088364:1" aria-label="Buy size L">L</a><a class="shop-cta" href="https://xcqc4a-1a.myshopify.com/cart/68225753121132:1" aria-label="Buy size XL">XL</a></div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </li>
+
+      <li>
+        <article class="deck-card shop-card" id="tees" aria-labelledby="tees-name">
+          <header class="card-head accent-blue">
+            <span class="card-idx">04</span>
             <h2 class="card-name" id="tees-name">T-SHIRTS</h2>
             <span class="card-rail" aria-hidden="true"></span>
             <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -202,7 +269,7 @@
       <li>
         <article class="deck-card shop-card" id="keychains" aria-labelledby="keychains-name">
           <header class="card-head accent-blue">
-            <span class="card-idx">04</span>
+            <span class="card-idx">05</span>
             <h2 class="card-name" id="keychains-name">KEYCHAINS</h2>
             <span class="card-rail" aria-hidden="true"></span>
             <span class="card-marks" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -233,7 +300,7 @@
 </footer>
 
 <script src="js/shop.js?v=20261010b"></script>
-<script src="js/shop-buy.js?v=20261117b"></script>
+<script src="js/shop-buy.js?v=20261118a"></script>
 <script src="js/header-pill.js?v=20260927b"></script>
 </body>
 </html>
