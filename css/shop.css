@@ -42,7 +42,7 @@
   opacity: 1;
   transform: none;
 }
-.shop-card .card-name { font-size: clamp(0.9rem, 1.3vw, 1.15rem); }
+.shop-card .card-name { font-size: clamp(0.9rem, 1.3vw, 1.15rem); white-space: normal; line-height: 1.25; text-indent: 0; padding-left: 0.2em; }
 
 /* Product photo slot: the site's no-signal placeholder, square, inside the
    card's inner frame. */
@@ -490,8 +490,6 @@ html.shop-modal-open { overflow: hidden; }
   .shop-card .card-idx { font-size: 9px; padding: 1px 3px; letter-spacing: 0.06em; }
   .shop-card .card-name {
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
     font-size: 10px;
     letter-spacing: 0.12em;
     text-indent: 0;

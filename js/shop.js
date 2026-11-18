@@ -164,3 +164,29 @@ window.addEventListener('scroll', () => {
     dialog.addEventListener('click', (e) => { if (e.target === dialog) close(); });
   });
 })();
+
+// Card heads in the same grid row share one height, so a long name that
+// wraps to two lines (SNOW WASH CREW NECK) doesn't push that card's photo
+// out of line with its neighbours.
+(function evenCardHeads() {
+  const heads = [...document.querySelectorAll('.shop-card .card-head')];
+  if (!heads.length) return;
+  const even = () => {
+    heads.forEach((h) => { h.style.minHeight = ''; });
+    const rows = new Map();
+    heads.forEach((h) => {
+      const top = Math.round(h.getBoundingClientRect().top + window.scrollY);
+      if (!rows.has(top)) rows.set(top, []);
+      rows.get(top).push(h);
+    });
+    rows.forEach((row) => {
+      if (row.length < 2) return;
+      const tallest = Math.max(...row.map((h) => h.getBoundingClientRect().height));
+      row.forEach((h) => { h.style.minHeight = tallest + 'px'; });
+    });
+  };
+  let raf = 0;
+  window.addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(even); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(even);
+  even();
+})();
