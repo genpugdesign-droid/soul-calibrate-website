@@ -425,7 +425,9 @@ html.shop-modal-open { overflow: hidden; }
 .shop-modal-photo { background: #fff; aspect-ratio: 1 / 1; }
 .shop-modal-photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .shop-modal-name { margin: 0 0 6px; font-size: 1.25rem; font-weight: 600; line-height: 1.25; color: var(--text); }
-.shop-modal-price { font-family: var(--font-mono); font-size: 1.05rem; color: var(--text); }
+/* the pop-up's own price + size + add to cart (a second Buy Button) */
+.shop-modal-buy { margin-top: 4px; padding-top: 12px; }
+.shop-media.opens-details { cursor: zoom-in; }
 .shop-modal-label {
   margin: 22px 0 10px;
   padding-top: 12px;
@@ -509,11 +511,15 @@ html.shop-modal-open { overflow: hidden; }
 
   .shop-details { margin-top: 8px; }
   .shop-more-btn { padding: 7px 2px; font-size: 8.5px; letter-spacing: 0.04em; }
-  .shop-more-extra { display: none; }
   /* the pop-up becomes a sheet that rises from the bottom of the screen */
   .shop-modal { width: 100%; max-width: none; max-height: 88dvh; margin: auto 0 0; }
   .shop-modal-frame { clip-path: none; border-left: 0; border-right: 0; border-bottom: 0; }
   .shop-modal .card-tag { display: inline-block; }
+  /* the sheet is wide enough for size + add to cart side by side */
+  .shop-modal .shop-cta-mount .shopify-buy__product { flex-direction: row; align-items: flex-end; gap: 8px; }
+  .shop-modal .shop-cta-mount .shopify-buy__option-select { flex: 1 1 auto; }
+  .shop-modal .shop-cta-mount .shopify-buy__btn-wrapper { flex: 1 1 auto; }
+  .shop-modal .shop-price { font-size: 1.05rem; }
   .shop-modal-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; }
   .shop-modal-photo { width: 132px; }
   .shop-modal-name { font-size: 1rem; }

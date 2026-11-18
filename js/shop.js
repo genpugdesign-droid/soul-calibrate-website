@@ -117,8 +117,8 @@ window.addEventListener('scroll', () => {
   });
 })();
 
-// Description / size chart pop-up. Each apparel card's [ details ] button
-// opens its <dialog> as a modal; it eases in and out, and closes on the
+// Description / size chart pop-up. Each apparel card's [ see more ] button,
+// or its product photo, opens its <dialog> as a modal with its own buy row; it eases in and out, and closes on the
 // close button, Escape, or a tap on the dimmed backdrop. Focus returns to
 // the button that opened it.
 (function detailsModal() {
@@ -147,6 +147,17 @@ window.addEventListener('scroll', () => {
       open.focus({ preventScroll: true });
     });
     dialog.querySelector('.shop-modal-close').addEventListener('click', close);
+    dialog.addEventListener('shop:close', close); // after add to cart (js/shop-buy.js)
+    // the product photo opens it too (but not the gallery's number buttons)
+    const card = box.closest('.shop-card');
+    const media = card && card.querySelector('.shop-media');
+    if (media) {
+      media.classList.add('opens-details');
+      media.addEventListener('click', (e) => {
+        if (e.target.closest('.shop-dots')) return;
+        open.click();
+      });
+    }
     // Escape: run the eased close instead of the instant one
     dialog.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
     // a click that lands on the dialog itself (not its frame) is the backdrop

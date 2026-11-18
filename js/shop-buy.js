@@ -192,7 +192,16 @@
           contents,
           events: {
             afterRender: () => { if (fallback) fallback.remove(); },
-            addVariantToCart: () => celebrate(node),
+            addVariantToCart: () => {
+              celebrate(node);
+              // From the details pop-up: Shopify's cart drawer opens behind the
+              // modal, so ease the pop-up shut after the sparkle to reveal it.
+              const dialog = node.closest('dialog');
+              if (dialog && dialog.open) {
+                // (an event, not a click: a page click also shuts Shopify's cart)
+                setTimeout(() => dialog.dispatchEvent(new Event('shop:close')), 500);
+              }
+            },
           },
         });
         ui.createComponent('product', {
