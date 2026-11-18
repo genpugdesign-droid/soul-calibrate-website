@@ -469,13 +469,13 @@ html.shop-modal-open { overflow: hidden; }
 /* Deep links (/shop#zip-up) land below the fixed header pill. */
 .shop-card { scroll-margin-top: 96px; }
 
-/* Phones: three across, so everything on sale shows at once. Each card keeps
+/* Phones: two across, so the products on sale show side by side. Each card keeps
    the photo, name, price, size and add-to-cart; the tagline and chips drop
    out, and the description / size chart stay behind their disclosures. */
 @media (max-width: 680px) {
   .shop { padding: 96px 16px 72px; }
   .shop-head { margin-bottom: 28px; }
-  .shop-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 
   .shop-grid .deck-card {
     clip-path: polygon(
@@ -487,13 +487,13 @@ html.shop-modal-open { overflow: hidden; }
   .shop-grid .deck-card::before { inset: 3px; clip-path: none; }
   .shop-card .card-head { margin: 4px 4px 0; padding: 6px 6px; gap: 5px; }
   .shop-card .card-head::after { left: 6px; width: 22px; }
-  .shop-card .card-idx { font-size: 8px; padding: 1px 3px; letter-spacing: 0.06em; }
+  .shop-card .card-idx { font-size: 9px; padding: 1px 3px; letter-spacing: 0.06em; }
   .shop-card .card-name {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 8.5px;
-    letter-spacing: 0.1em;
+    font-size: 10px;
+    letter-spacing: 0.12em;
     text-indent: 0;
   }
   .shop-card .card-rail,
@@ -503,14 +503,14 @@ html.shop-modal-open { overflow: hidden; }
   .shop-dots { left: 4px; bottom: 4px; gap: 2px; }
   .shop-dots button { padding: 2px 4px; font-size: 8px; letter-spacing: 0.04em; }
 
-  .shop-body { padding: 9px 7px 10px; }
+  .shop-body { padding: 12px 10px 12px; }
   .shop-card .card-tag,
   .shop-card .shop-body > p,
   .shop-card .shop-options { display: none; }
-  .shop-name { margin: 0 0 4px; font-size: 10.5px; line-height: 1.25; }
+  .shop-name { margin: 0 0 4px; font-size: 12.5px; line-height: 1.3; }
 
   .shop-details { margin-top: 8px; }
-  .shop-more-btn { padding: 7px 2px; font-size: 8.5px; letter-spacing: 0.04em; }
+  .shop-more-btn { padding: 8px 4px; font-size: 9.5px; letter-spacing: 0.06em; }
   /* the pop-up becomes a sheet that rises from the bottom of the screen */
   .shop-modal { width: 100%; max-width: none; max-height: 88dvh; margin: auto 0 0; }
   .shop-modal-frame { clip-path: none; border-left: 0; border-right: 0; border-bottom: 0; }
@@ -531,14 +531,14 @@ html.shop-modal-open { overflow: hidden; }
 
   .shop-buy { padding-top: 10px; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 6px; }
   .shop-buy .shop-cta-mount { flex: none; }
-  .shop-price { font-size: 13px; }
+  .shop-price { font-size: 15px; }
   .shop-cta-mount .shopify-buy__product { flex-direction: column; align-items: stretch; gap: 6px; }
   .shop-cta-mount .shopify-buy__option-select { flex: none; }
   .shop-cta-mount .shopify-buy__option-select__label { margin-bottom: 3px; font-size: 8px; }
-  .shop-cta-mount .shopify-buy__option-select__select { padding: 7px 18px 7px 6px; font-size: 10px; }
+  .shop-cta-mount .shopify-buy__option-select__select { padding: 8px 20px 8px 8px; font-size: 11px; }
   .shop-cta-mount .shopify-buy__select-icon { right: 6px; width: 8px; }
   .shop-cta-mount .shopify-buy__btn,
-  .shop-cta { width: 100%; padding: 8px 2px; font-size: 8.5px; letter-spacing: 0.04em; white-space: normal; }
+  .shop-cta { width: 100%; padding: 9px 4px; font-size: 9.5px; letter-spacing: 0.08em; white-space: normal; }
   .shop-cta-sizes { gap: 3px; }
   .shop-cta-sizes .shop-cta { flex: 1 1 26px; min-width: 0; width: auto; padding: 7px 0; }
 

@@ -38,6 +38,21 @@
       text: { button: '[ add to cart ]' },
     },
     cart: {
+      // Trash: the line greys out and strikes through for a beat, so it's
+      // clear what was removed, then its quantity goes to zero.
+      DOMEvents: {
+        'click .magi-trash': function (evt, target) {
+          const line = target.closest('li');
+          if (line) {
+            line.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            line.style.opacity = '0.35';
+            line.style.transform = 'translateX(8px)';
+            line.style.textDecoration = 'line-through';
+          }
+          target.disabled = true;
+          setTimeout(() => this.component.setQuantity(target, () => 0), 380);
+        },
+      },
       text: {
         title: '// CART', total: 'subtotal', button: '[ checkout ]', empty: 'cart is empty',
         thanks: 'Thank you for supporting the start to our journey. It means a lot to us.',
@@ -66,9 +81,28 @@
       googleFonts: ['IBM Plex Mono'],
     },
     lineItem: {
+      // Shopify's quantity row plus a trash button, so a line can go in one
+      // tap instead of stepping the count down to zero (handled by
+      // cart.DOMEvents below). A bordered square like the +/- buttons; red on hover.
+      templates: {
+        quantity: '<div class="{{data.classes.lineItem.quantity}}" data-element="lineItem.quantity">'
+          + '<button class="{{data.classes.lineItem.quantityButton}} {{data.classes.lineItem.quantityDecrement}}" type="button" data-line-item-id="{{data.id}}" data-element="lineItem.quantityDecrement">'
+          + '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M4 7h8v2H4z"/></svg><span class="visuallyhidden">{{data.text.quantityDecrementAccessibilityLabel}}</span></button>'
+          + '<input class="{{data.classes.lineItem.quantityInput}}" type="number" min="0" aria-label="{{data.text.quantityInputAccessibilityLabel}}" data-line-item-id="{{data.id}}" value="{{data.quantity}}" data-element="lineItem.quantityInput">'
+          + '<button class="{{data.classes.lineItem.quantityButton}} {{data.classes.lineItem.quantityIncrement}}" type="button" data-line-item-id="{{data.id}}" data-element="lineItem.quantityIncrement">'
+          + '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M12 7H9V4H7v3H4v2h3v3h2V9h3z"/></svg><span class="visuallyhidden">{{data.text.quantityIncrementAccessibilityLabel}}</span></button>'
+          + '<button class="magi-trash" type="button" data-line-item-id="{{data.id}}" title="Remove from cart" aria-label="Remove {{data.title}} from cart"'
+          + ' style="display:inline-flex;align-items:center;justify-content:center;vertical-align:top;width:30px;height:30px;margin:0 0 0 10px;padding:0;'
+          + 'color:' + C.text + ';background:transparent;border:1px solid ' + C.border + ';border-radius:0;cursor:pointer;"'
+          + ' onmouseover="this.style.color=\'#ff2851\';this.style.borderColor=\'#ff2851\'" onmouseout="this.style.color=\'' + C.text + '\';this.style.borderColor=\'' + C.border + '\'">'
+          + '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;">'
+          + '<path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.6 6.5v5M9.4 6.5v5"/></svg></button>'
+          + '</div>',
+      },
       styles: {
         title: ink, variantTitle: { color: C.textDim }, price: ink, fullPrice: ink,
-        quantity: ink,
+        // Shopify fixes this row's width; let it grow to fit the trash button
+        quantity: Object.assign({ width: 'auto', 'white-space': 'nowrap' }, ink),
         quantityInput: { color: C.text, 'border-color': C.border, 'background-color': C.bg },
         quantityIncrement: { color: C.text, 'border-color': C.border },
         quantityDecrement: { color: C.text, 'border-color': C.border },
