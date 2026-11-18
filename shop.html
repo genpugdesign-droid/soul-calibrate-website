@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20261104a">
 <link rel="stylesheet" href="css/header-pill.css?v=20260927c">
-<link rel="stylesheet" href="css/shop.css?v=20261117a">
+<link rel="stylesheet" href="css/shop.css?v=20261117b">
 </head>
 <body class="shop-page">
 
@@ -133,6 +133,35 @@
             <ul class="shop-options" aria-label="Details">
               <li>vintage black</li><li>400 gsm</li><li>boxy fit</li><li>front + back print</li>
             </ul>
+            <!-- Description and size chart come from the Shopify listing
+                 (js/shop-buy.js refreshes them live); this copy shows if
+                 Shopify can't be reached. -->
+            <div class="shop-details" data-shopify-details="15501344768364">
+              <details class="shop-more">
+                <summary>description</summary>
+                <div class="shop-more-body" data-shopify-description>
+                  <p>Heavyweight boxy-fit zip hoodie with brushed-fleece interior for comfort. Washed snow-dye finish delivers a worn-in vintage look. Oversized drop shoulders layer easily, while the zip front shifts from closed to open styling for fall/winter streetwear.</p>
+                  <p>Front design is printed directly on the zipper. See Clearly, Move Simply. Waste Nothing.</p>
+                  <p>Back Design: The first record of grappling, was written on a tomb wall, the next one is Magi.</p>
+                  <p>400GSM Unisex Vintage-Wash Boxy-Fit Zip-Up Hoodie</p>
+                </div>
+              </details>
+              <details class="shop-more">
+                <summary>size chart</summary>
+                <div class="shop-more-body shop-size-chart" data-shopify-sizechart>
+                  <table>
+                    <thead><tr><th colspan="6">imperial &middot; inches</th></tr></thead>
+                    <tbody>
+                      <tr><th></th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th></tr>
+                      <tr><th>chest</th><td>27.56</td><td>28.35</td><td>29.13</td><td>29.92</td><td>30.71</td></tr>
+                      <tr><th>length</th><td>24.80</td><td>25.59</td><td>26.38</td><td>27.17</td><td>27.95</td></tr>
+                      <tr><th>Shoulder</th><td>24.41</td><td>25.20</td><td>25.98</td><td>26.77</td><td>27.56</td></tr>
+                      <tr><th>Sleeve length</th><td>20.87</td><td>21.26</td><td>21.65</td><td>22.05</td><td>22.44</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
             <div class="shop-buy shop-buy--options">
               <span class="shop-price">$70</span>
               <div class="shop-cta-mount" data-shopify-product="15501344768364" data-shopify-options>
@@ -202,7 +231,7 @@
 </footer>
 
 <script src="js/shop.js?v=20261010b"></script>
-<script src="js/shop-buy.js?v=20261117a"></script>
+<script src="js/shop-buy.js?v=20261117b"></script>
 <script src="js/header-pill.js?v=20260927b"></script>
 </body>
 </html>

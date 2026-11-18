@@ -116,8 +116,63 @@
     setTimeout(() => burst.remove(), 1600);
   };
 
+  // Description + size chart, live from the Shopify listing. Its
+  // descriptionHtml is copy paragraphs followed by a size <table>; the copy
+  // goes in one disclosure, the table in the other. Only text, line breaks
+  // and table cells are carried over (no inline styles or other markup).
+  const fillDetails = (client) => {
+    document.querySelectorAll('[data-shopify-details]').forEach((box) => {
+      const gid = 'gid://shopify/Product/' + box.dataset.shopifyDetails;
+      client.product.fetch(gid).then((p) => {
+        if (!p || !p.descriptionHtml) return;
+        const doc = new DOMParser().parseFromString(p.descriptionHtml, 'text/html');
+        const descBox = box.querySelector('[data-shopify-description]');
+        const chartBox = box.querySelector('[data-shopify-sizechart]');
+
+        const paras = [];
+        doc.querySelectorAll('p').forEach((el) => {
+          // <br><br> separates paragraphs inside one <p>
+          el.innerHTML.split(/(?:<br\s*\/?>\s*){1,}/i).forEach((chunk) => {
+            const t = new DOMParser().parseFromString(chunk, 'text/html').body.textContent.trim();
+            if (t) paras.push(t);
+          });
+        });
+        if (descBox && paras.length) {
+          descBox.replaceChildren(...paras.map((t) => {
+            const el = document.createElement('p');
+            el.textContent = t;
+            return el;
+          }));
+        }
+
+        const src = doc.querySelector('table');
+        if (chartBox && src) {
+          const table = document.createElement('table');
+          src.querySelectorAll('thead, tbody').forEach((sec) => {
+            const out = document.createElement(sec.tagName.toLowerCase());
+            sec.querySelectorAll('tr').forEach((tr) => {
+              const row = document.createElement('tr');
+              tr.querySelectorAll('th, td').forEach((cell) => {
+                const c = document.createElement(cell.tagName.toLowerCase());
+                // the header names the unit once, so cells drop " in"
+                c.textContent = cell.textContent.trim().replace(/\s*in\.?$/i, '');
+                if (sec.tagName === 'THEAD' && /^imperial$/i.test(c.textContent)) c.textContent += ' \u00b7 inches';
+                if (cell.colSpan > 1) c.colSpan = cell.colSpan;
+                row.appendChild(c);
+              });
+              out.appendChild(row);
+            });
+            table.appendChild(out);
+          });
+          chartBox.replaceChildren(table);
+        }
+      }).catch(() => {}); // keep the built-in copy
+    });
+  };
+
   const init = () => {
     const client = window.ShopifyBuy.buildClient(SHOP);
+    fillDetails(client);
     window.ShopifyBuy.UI.onReady(client).then((ui) => {
       mounts.forEach((node) => {
         // Fallback: one cart link, or a row of per-size links for apparel.
