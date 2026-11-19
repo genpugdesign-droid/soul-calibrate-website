@@ -121,6 +121,24 @@
   // Add-to-cart feedback: the button flashes, a few sparks burst off it, and
   // a small "thank you!" floats up and fades. Reduced motion keeps the text.
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let toastTimer = 0;
+  const thankToast = () => {
+    let toast = document.querySelector('.shop-toast');
+    if (toast) toast.remove(); // re-append so it stacks after the cart frame
+    toast = document.createElement('div');
+    toast.className = 'shop-toast';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = '<span class="shop-toast-spark" aria-hidden="true"></span>'
+      + '<span>thank you! added to cart</span>';
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('is-in'));
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('is-in');
+      setTimeout(() => toast.remove(), 400);
+    }, 2200);
+  };
+
   const celebrate = (node) => {
     const button = node.querySelector('.shopify-buy__btn');
     if (button) {
@@ -148,6 +166,9 @@
     burst.appendChild(thanks);
     node.appendChild(burst);
     setTimeout(() => burst.remove(), 1600);
+    // Phones: Shopify's cart slides over the page right away and hides the
+    // burst, so a "thank you!" toast is pinned above the cart as well.
+    if (window.matchMedia('(max-width: 680px)').matches) thankToast();
   };
 
   // Description + size chart, live from the Shopify listing. Its

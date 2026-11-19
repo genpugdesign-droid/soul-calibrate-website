@@ -165,14 +165,25 @@ window.addEventListener('scroll', () => {
   });
 })();
 
-// Card heads in the same grid row share one height, so a long name that
+// Card heads in the same grid row share one height (and wrapped names are
+// tightened to their text), so a long name that
 // wraps to two lines (SNOW WASH CREW NECK) doesn't push that card's photo
 // out of line with its neighbours.
 (function evenCardHeads() {
   const heads = [...document.querySelectorAll('.shop-card .card-head')];
   if (!heads.length) return;
   const even = () => {
-    heads.forEach((h) => { h.style.minHeight = ''; });
+    heads.forEach((h) => {
+      h.style.minHeight = '';
+      // A wrapped name keeps its full box width, leaving a gap before the
+      // dashed rail; shrink it to its longest word so the rail meets it.
+      const name = h.querySelector('.card-name');
+      if (name) {
+        name.style.width = '';
+        const line = parseFloat(getComputedStyle(name).lineHeight) || 20;
+        if (name.getBoundingClientRect().height > line * 1.5) name.style.width = 'min-content';
+      }
+    });
     const rows = new Map();
     heads.forEach((h) => {
       const top = Math.round(h.getBoundingClientRect().top + window.scrollY);
