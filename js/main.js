@@ -355,7 +355,11 @@ if (deckToggle) {
       t.append(img);
       peek.append(t);
     });
-    btn.after(peek);
+    // button and peek share one row, the photos just right of the button
+    const row = document.createElement('div');
+    row.className = 'member-actions';
+    btn.before(row);
+    row.append(btn, peek);
   });
   const root = document.documentElement;
   let index = 0;

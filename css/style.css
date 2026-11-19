@@ -945,10 +945,17 @@ a { color: inherit; }
 /* Bio photo peek (js/main.js): small, faded greyscale thumbnails under
    the button. Secondary on purpose: they wake up a little on row hover and
    fully only under the pointer; the full photos live in the bio. */
+.member-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: clamp(6px, 1vh, 10px) 0 0;
+}
+.member-actions .member-open { margin: 0; }
 .member-peek {
   display: flex;
   gap: 6px;
-  margin-top: 10px;
 }
 .member-peek-thumb {
   width: 34px;
@@ -970,8 +977,22 @@ a { color: inherit; }
 .member:hover .member-peek-thumb { opacity: 0.65; }
 .member-peek-thumb:hover { opacity: 1; border-color: var(--blue-dim); }
 .member-peek-thumb:hover img { filter: none; }
-@media (max-width: 640px) {
-  .member-peek-thumb { width: 30px; height: 30px; }
+/* Where the bio column is narrow the thumbnails overlap into a stack so
+   they still fit beside the button; hovering one lifts it to the front. */
+.member-peek-thumb { position: relative; background: var(--panel); }
+.member-peek-thumb:hover { z-index: 1; }
+@media (max-width: 1320px) {
+  .member-actions { gap: 8px 10px; }
+  .member-peek { gap: 0; }
+  .member-peek-thumb { width: 28px; height: 28px; box-shadow: 0 0 0 2px var(--panel); }
+  .member-peek-thumb + .member-peek-thumb { margin-left: -8px; }
+}
+/* tablet columns and phones: a tighter stack (fits beside the button down
+   to a 375px-wide phone; narrower than that it drops below the button) */
+@media (max-width: 1100px) {
+  .member-actions { gap: 8px 6px; }
+  .member-peek-thumb { width: 20px; height: 20px; }
+  .member-peek-thumb + .member-peek-thumb { margin-left: -9px; }
 }
 .member-open:focus-visible { outline: 1px solid var(--blue); outline-offset: 3px; }
 
