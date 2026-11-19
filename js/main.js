@@ -328,6 +328,22 @@ if (deckToggle) {
 
   const count = document.getElementById('bio-count');
   const pad = (n) => String(n).padStart(2, '0');
+
+  // Each "Read full bio" button says how many photos wait inside, counted
+  // from that member's gallery so it stays right as photos change.
+  members.forEach((m) => {
+    const btn = m.querySelector('.member-open');
+    const more = m.querySelector('template.member-more');
+    const n = more ? more.content.querySelectorAll('.bio-gallery img').length : 0;
+    if (!btn || !n || btn.querySelector('.member-open-photos')) return;
+    const tag = document.createElement('span');
+    tag.className = 'member-open-photos';
+    tag.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="10" rx="1"/>'
+      + '<circle cx="5.5" cy="7" r="1.3"/><path d="M2 12.5l4-3.5 3 2.5 2-1.5 3 2.5"/></svg>'
+      + '<span>' + n + (n === 1 ? ' photo' : ' photos') + '</span>';
+    btn.append(tag);
+    btn.setAttribute('aria-label', 'Read full bio, with ' + n + (n === 1 ? ' photo' : ' photos'));
+  });
   const root = document.documentElement;
   let index = 0;
 
