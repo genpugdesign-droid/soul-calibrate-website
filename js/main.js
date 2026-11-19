@@ -329,20 +329,33 @@ if (deckToggle) {
   const count = document.getElementById('bio-count');
   const pad = (n) => String(n).padStart(2, '0');
 
-  // Each "Read full bio" button says how many photos wait inside, counted
-  // from that member's gallery so it stays right as photos change.
+  // A quiet peek at each member's bio gallery: small, faded, greyscale
+  // thumbnails under the "Read full bio" button. They hint that photos wait
+  // inside without competing with the bio; clicking one opens the bio with
+  // the gallery on that photo. Built from the gallery so it stays in sync.
   members.forEach((m) => {
     const btn = m.querySelector('.member-open');
     const more = m.querySelector('template.member-more');
-    const n = more ? more.content.querySelectorAll('.bio-gallery img').length : 0;
-    if (!btn || !n || btn.querySelector('.member-open-photos')) return;
-    const tag = document.createElement('span');
-    tag.className = 'member-open-photos';
-    tag.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="10" rx="1"/>'
-      + '<circle cx="5.5" cy="7" r="1.3"/><path d="M2 12.5l4-3.5 3 2.5 2-1.5 3 2.5"/></svg>'
-      + '<span>' + n + (n === 1 ? ' photo' : ' photos') + '</span>';
-    btn.append(tag);
-    btn.setAttribute('aria-label', 'Read full bio, with ' + n + (n === 1 ? ' photo' : ' photos'));
+    const items = more ? [...more.content.querySelectorAll('.bio-gallery > li')] : [];
+    if (!btn || !items.length || m.querySelector('.member-peek')) return;
+    const peek = document.createElement('div');
+    peek.className = 'member-peek';
+    peek.setAttribute('aria-hidden', 'true'); // the button already opens the same bio
+    items.forEach((li, k) => {
+      const src = li.querySelector('img')?.getAttribute('src') || li.querySelector('video')?.getAttribute('poster');
+      if (!src) return;
+      const t = document.createElement('span');
+      t.className = 'member-peek-thumb';
+      t.dataset.photo = String(k);
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      t.append(img);
+      peek.append(t);
+    });
+    btn.after(peek);
   });
   const root = document.documentElement;
   let index = 0;
@@ -496,6 +509,13 @@ if (deckToggle) {
     m.addEventListener('click', (e) => {
       if (e.target.closest('a')) return;     // LinkedIn and portfolio go where they point
       open(i);
+      // a peek thumbnail opens the gallery on that photo
+      const thumb = e.target.closest('.member-peek-thumb');
+      const gallery = thumb && body.querySelector('.bio-gallery');
+      if (gallery) {
+        const k = Number(thumb.dataset.photo) || 0;
+        requestAnimationFrame(() => gallery.scrollTo({ left: k * gallery.clientWidth, behavior: 'instant' }));
+      }
     });
   });
 
