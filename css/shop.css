@@ -17,7 +17,7 @@
   margin: 0 0 10px;
   font-size: clamp(1.4rem, 3vw, 2.2rem);
   font-weight: 700;
-  letter-spacing: 0.13em; /* +5% of the type size over the site default 0.08em */
+  letter-spacing: 0.08em;
   color: var(--text);
 }
 .shop-head p { margin: 0; max-width: 66ch; color: var(--text-dim); font-size: 0.9rem; }
@@ -370,13 +370,6 @@ body .shopify-buy-frame--toggle.is-sticky { display: block; }
 .shop-cta-sizes .shop-cta { min-width: 40px; text-align: center; }
 
 /* Product shots on white: keep the whole garment in frame. */
-/* The hoodie's first view zooms in on the chest print so its words read
-   ("see clearly / move simply / waste nothing"); the origin is the print's
-   centre in the photo. The back view and the pop-up show the whole hoodie. */
-.shop-media--flat .shop-slide--print img {
-  transform: scale(2.2);
-  transform-origin: 50% 43.5%;
-}
 .shop-media--flat { background: #fff; }
 .shop-media--flat.has-photo img { object-fit: contain; object-position: 50% 50%; }
 /* A picker with a single choice (Color: Vintage Black) says nothing; the
