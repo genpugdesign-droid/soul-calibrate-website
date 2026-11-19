@@ -190,3 +190,44 @@ window.addEventListener('scroll', () => {
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(even);
   even();
 })();
+
+// Inside the pop-up: the front/back thumbnails switch the photo, and the
+// size chart is a disclosure that eases open and shut (like the cards' old
+// drop-downs did) instead of snapping.
+(function modalExtras() {
+  document.querySelectorAll('.shop-modal-photo').forEach((photo) => {
+    const views = [...photo.querySelectorAll('.shop-modal-view img')];
+    const thumbs = [...photo.querySelectorAll('.shop-modal-thumbs button')];
+    thumbs.forEach((t, i) => t.addEventListener('click', () => {
+      views.forEach((v, j) => v.classList.toggle('is-active', i === j));
+      thumbs.forEach((b, j) => b.setAttribute('aria-pressed', String(i === j)));
+    }));
+  });
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || !Element.prototype.animate) return;
+  const EASE = { duration: 320, easing: 'cubic-bezier(0.42, 0, 0.58, 1)' };
+  document.querySelectorAll('.shop-modal-more').forEach((box) => {
+    const summary = box.querySelector('summary');
+    const body = box.querySelector('.shop-modal-more-body');
+    let anim = null;
+    const run = (from, to, done) => {
+      if (anim) anim.cancel();
+      body.style.overflow = 'hidden';
+      anim = body.animate([{ height: from + 'px', opacity: from ? 1 : 0 }, { height: to + 'px', opacity: to ? 1 : 0 }], EASE);
+      anim.onfinish = () => { anim = null; body.style.overflow = ''; if (done) done(); };
+    };
+    summary.addEventListener('click', (e) => {
+      e.preventDefault();
+      const current = body.getBoundingClientRect().height;
+      if (!box.open || box.dataset.closing) {
+        delete box.dataset.closing;
+        box.open = true;
+        run(anim ? current : 0, body.scrollHeight);
+      } else {
+        box.dataset.closing = '1';
+        run(current, 0, () => { box.open = false; delete box.dataset.closing; });
+      }
+    });
+  });
+})();

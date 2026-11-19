@@ -422,8 +422,38 @@ html.shop-modal-open { overflow: hidden; }
   gap: 28px;
   padding: 24px;
 }
-.shop-modal-photo { background: #fff; aspect-ratio: 1 / 1; }
-.shop-modal-photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+/* Photo column: front/back views with thumbnails, held in view while the
+   info column scrolls past it. */
+.shop-modal-photo { align-self: start; position: sticky; top: 76px; }
+.shop-modal-view { position: relative; background: #fff; aspect-ratio: 1 / 1; }
+.shop-modal-view img {
+  position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+  object-fit: contain; opacity: 0; transition: opacity 0.25s ease;
+}
+.shop-modal-view img.is-active { opacity: 1; }
+.shop-modal-thumbs { display: flex; gap: 8px; margin-top: 8px; }
+.shop-modal-thumbs button {
+  width: 64px; aspect-ratio: 1 / 1; padding: 0; background: #fff; cursor: pointer;
+  border: 1px solid var(--border-strong); outline-offset: 2px; opacity: 0.6;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+.shop-modal-thumbs button img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.shop-modal-thumbs button:hover,
+.shop-modal-thumbs button:focus-visible { opacity: 1; }
+.shop-modal-thumbs button[aria-pressed="true"] { opacity: 1; border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+
+/* Size chart: collapsed until asked for. */
+.shop-modal-more summary { display: flex; align-items: center; cursor: pointer; list-style: none; }
+.shop-modal-more summary::-webkit-details-marker { display: none; }
+/* flex drops the trailing space in the label's '// ', so space it here */
+.shop-modal-more summary::before { content: '//'; margin-right: 0.55em; }
+.shop-modal-more summary::after { content: '[ + ]'; margin-left: auto; color: var(--blue-dim); }
+.shop-modal-more[open]:not([data-closing]) summary::after { content: '[ \2212 ]'; }
+.shop-modal-more summary:hover,
+.shop-modal-more summary:focus-visible { color: var(--text); outline: none; }
+.shop-modal-more summary:hover::after,
+.shop-modal-more summary:focus-visible::after { color: var(--blue); }
+.shop-modal-more-body { padding-bottom: 2px; }
 .shop-modal-name { margin: 0 0 6px; font-size: 1.25rem; font-weight: 600; line-height: 1.25; color: var(--text); }
 /* the pop-up's own price + size + add to cart (a second Buy Button) */
 .shop-modal-buy { margin-top: 4px; padding-top: 12px; }
@@ -518,8 +548,17 @@ html.shop-modal-open { overflow: hidden; }
   .shop-modal .shop-cta-mount .shopify-buy__option-select { flex: 1 1 auto; }
   .shop-modal .shop-cta-mount .shopify-buy__btn-wrapper { flex: 1 1 auto; }
   .shop-modal .shop-price { font-size: 1.05rem; }
-  .shop-modal-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; }
-  .shop-modal-photo { width: 132px; }
+  /* photo beside name + price + buy; description and size chart run full
+     width beneath, so there's no empty column next to the photo */
+  .shop-modal-grid { grid-template-columns: 124px minmax(0, 1fr); column-gap: 14px; row-gap: 0; padding: 16px; }
+  .shop-modal-info { display: contents; }
+  .shop-modal-photo { position: static; grid-column: 1; grid-row: 1 / span 2; }
+  .shop-modal-thumbs { gap: 6px; margin-top: 6px; }
+  .shop-modal-thumbs button { width: calc(50% - 3px); }
+  .shop-modal-name { grid-column: 2; grid-row: 1; align-self: end; }
+  .shop-modal-buy { grid-column: 2; grid-row: 2; align-self: start; }
+  .shop-modal-info > :not(.shop-modal-name):not(.shop-modal-buy) { grid-column: 1 / -1; }
+  .shop-modal .shop-cta-mount .shopify-buy__product { flex-wrap: wrap; }
   .shop-modal-name { font-size: 1rem; }
   .shop-modal .shop-modal-desc p { font-size: 0.8rem; line-height: 1.55; }
   .shop-modal .shop-size-chart table { font-size: 10px; }
