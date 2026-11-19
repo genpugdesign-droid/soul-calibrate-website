@@ -117,30 +117,117 @@ window.addEventListener('scroll', () => {
   });
 })();
 
-// Description / size chart disclosures ease open and shut instead of
-// snapping, so the card (and its row) grows smoothly. The <details> keeps
-// working natively; this only animates the body's height around the toggle.
-(function easeDisclosures() {
+// Description / size chart pop-up. Each apparel card's [ see more ] button,
+// or its product photo, opens its <dialog> as a modal with its own buy row; it eases in and out, and closes on the
+// close button, Escape, or a tap on the dimmed backdrop. Focus returns to
+// the button that opened it.
+(function detailsModal() {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.shop-details').forEach((box) => {
+    const open = box.querySelector('.shop-more-btn');
+    const dialog = box.querySelector('.shop-modal');
+    if (!open || !dialog || typeof dialog.showModal !== 'function') return;
+
+    const close = () => {
+      if (!dialog.open || dialog.classList.contains('is-closing')) return;
+      if (reduced) { dialog.close(); return; }
+      dialog.classList.add('is-closing');
+      const done = () => { dialog.classList.remove('is-closing'); dialog.close(); };
+      dialog.addEventListener('animationend', done, { once: true });
+      setTimeout(() => { if (dialog.classList.contains('is-closing')) done(); }, 400);
+    };
+
+    open.addEventListener('click', () => {
+      dialog.showModal();
+      dialog.scrollTop = 0;
+      document.documentElement.classList.add('shop-modal-open');
+    });
+    dialog.addEventListener('close', () => {
+      document.documentElement.classList.remove('shop-modal-open');
+      open.focus({ preventScroll: true });
+    });
+    dialog.querySelector('.shop-modal-close').addEventListener('click', close);
+    dialog.addEventListener('shop:close', close); // after add to cart (js/shop-buy.js)
+    // the product photo opens it too (but not the gallery's number buttons)
+    const card = box.closest('.shop-card');
+    const media = card && card.querySelector('.shop-media');
+    if (media) {
+      media.classList.add('opens-details');
+      media.addEventListener('click', (e) => {
+        if (e.target.closest('.shop-dots')) return;
+        open.click();
+      });
+    }
+    // Escape: run the eased close instead of the instant one
+    dialog.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
+    // a click that lands on the dialog itself (not its frame) is the backdrop
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) close(); });
+  });
+})();
+
+// Card heads in the same grid row share one height (and wrapped names are
+// tightened to their text), so a long name that
+// wraps to two lines (SNOW WASH CREW NECK) doesn't push that card's photo
+// out of line with its neighbours.
+(function evenCardHeads() {
+  const heads = [...document.querySelectorAll('.shop-card .card-head')];
+  if (!heads.length) return;
+  const even = () => {
+    heads.forEach((h) => {
+      h.style.minHeight = '';
+      // A wrapped name keeps its full box width, leaving a gap before the
+      // dashed rail; shrink it to its longest word so the rail meets it.
+      const name = h.querySelector('.card-name');
+      if (name) {
+        name.style.width = '';
+        const line = parseFloat(getComputedStyle(name).lineHeight) || 20;
+        if (name.getBoundingClientRect().height > line * 1.5) name.style.width = 'min-content';
+      }
+    });
+    const rows = new Map();
+    heads.forEach((h) => {
+      const top = Math.round(h.getBoundingClientRect().top + window.scrollY);
+      if (!rows.has(top)) rows.set(top, []);
+      rows.get(top).push(h);
+    });
+    rows.forEach((row) => {
+      if (row.length < 2) return;
+      const tallest = Math.max(...row.map((h) => h.getBoundingClientRect().height));
+      row.forEach((h) => { h.style.minHeight = tallest + 'px'; });
+    });
+  };
+  let raf = 0;
+  window.addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(even); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(even);
+  even();
+})();
+
+// Inside the pop-up: the front/back thumbnails switch the photo, and the
+// size chart is a disclosure that eases open and shut (like the cards' old
+// drop-downs did) instead of snapping.
+(function modalExtras() {
+  document.querySelectorAll('.shop-modal-photo').forEach((photo) => {
+    const views = [...photo.querySelectorAll('.shop-modal-view img')];
+    const thumbs = [...photo.querySelectorAll('.shop-modal-thumbs button')];
+    thumbs.forEach((t, i) => t.addEventListener('click', () => {
+      views.forEach((v, j) => v.classList.toggle('is-active', i === j));
+      thumbs.forEach((b, j) => b.setAttribute('aria-pressed', String(i === j)));
+    }));
+  });
+
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced || !Element.prototype.animate) return;
-  const EASE = { duration: 320, easing: 'cubic-bezier(0.42, 0, 0.58, 1)' }; // ease-in-out
-
-  document.querySelectorAll('.shop-more').forEach((box) => {
+  const EASE = { duration: 320, easing: 'cubic-bezier(0.42, 0, 0.58, 1)' };
+  document.querySelectorAll('.shop-modal-more').forEach((box) => {
     const summary = box.querySelector('summary');
-    const body = box.querySelector('.shop-more-body');
-    if (!summary || !body) return;
+    const body = box.querySelector('.shop-modal-more-body');
     let anim = null;
-
     const run = (from, to, done) => {
       if (anim) anim.cancel();
       body.style.overflow = 'hidden';
-      // the body's bottom padding eases with it, or it snaps at the closed end
-      const pad = getComputedStyle(body).paddingBottom;
-      const frame = (h) => ({ height: h + 'px', paddingBottom: h ? pad : '0px', opacity: h ? 1 : 0 });
-      anim = body.animate([frame(from), frame(to)], EASE);
+      anim = body.animate([{ height: from + 'px', opacity: from ? 1 : 0 }, { height: to + 'px', opacity: to ? 1 : 0 }], EASE);
       anim.onfinish = () => { anim = null; body.style.overflow = ''; if (done) done(); };
     };
-
     summary.addEventListener('click', (e) => {
       e.preventDefault();
       const current = body.getBoundingClientRect().height;
