@@ -204,7 +204,8 @@
   .site-nav a, .site-nav a + a { padding: 7px 9px; }
 }
 
-/* mobile: merch | lockup | menu, the menu dropping as a panel under the bar */
+/* mobile: menu | lockup | merch — merch stays on the right, as on desktop;
+   the menu drops as a panel under the bar */
 @media (max-width: 860px) {
   .site-header,
   .site-header.scrolled {
@@ -213,12 +214,10 @@
     gap: 8px;   /* at 24px the side columns could not hold the merch chip and the lockup drifted */
     padding: 7px 8px;
   }
-  .nav-merch { grid-column: 1; grid-row: 1; justify-self: start; }
+  .nav-toggle { grid-column: 1; grid-row: 1; justify-self: start; border-radius: 999px; width: 38px; height: 30px; }
   .site-header .logo { grid-column: 2; grid-row: 1; }
-  .nav-toggle { grid-column: 3; grid-row: 1; justify-self: end; border-radius: 999px; width: 38px; height: 30px; }
+  .nav-merch { grid-column: 3; grid-row: 1; justify-self: end; }
   .merch-link { padding: 6px 12px; font-size: 12px; }
-  .merch-cta { right: auto; left: 0; }
-  .merch-cta::before { right: auto; left: 26px; }
   .site-nav {
     top: calc(100% + 8px);
     padding: 6px;

@@ -546,6 +546,96 @@ html.shop-modal-open { overflow: hidden; }
 /* Deep links (/shop#zip-up) land below the fixed header pill. */
 .shop-card { scroll-margin-top: 96px; }
 
+/* ── about: who makes this ──
+   Promo links often land people on the shop first, so it says what the
+   company and the software are and sends them on to the main site. Built
+   like the contact card: panel ground, strong border, the blue corner tick. */
+.shop-head-links { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 12px !important; font-size: 0.85rem; }
+.shop-head-links a { color: var(--blue); text-decoration: none; }
+.shop-head-links a:hover, .shop-head-links a:focus-visible { text-decoration: underline; }
+
+.shop-about {
+  padding: 72px 6vw 96px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 72px;
+}
+.shop-about-head { margin-bottom: 28px; }
+.shop-about-head h2 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.4vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+.shop-about-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+.shop-about-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 30px 24px;
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(120deg, rgba(0, 229, 255, 0.05), transparent 45%), var(--panel);
+}
+.shop-about-card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 14px;
+  height: 14px;
+  border-top: 2px solid var(--blue);
+  border-left: 2px solid var(--blue);
+}
+.shop-about-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+.shop-about-mark { display: flex; align-items: center; gap: 14px; }
+.shop-about-mark img { width: 44px; height: 44px; object-fit: contain; flex: none; }
+.shop-about-mark h3 {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: clamp(1rem, 1.6vw, 1.3rem);
+  font-weight: 600;
+  color: var(--text);
+}
+.shop-about-card p { margin: 0; max-width: 60ch; color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
+.shop-about-card em { color: var(--text); }
+.shop-about-link { margin-top: auto; padding-top: 4px; color: var(--blue); font-size: 0.85rem; text-decoration: none; }
+.shop-about-link:hover, .shop-about-link:focus-visible { text-decoration: underline; }
+
+.shop-about-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.shop-about-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--blue);
+  border: 1px solid var(--blue);
+  text-decoration: none;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+.shop-about-btn:hover, .shop-about-btn:focus-visible { color: var(--blue); background: transparent; }
+.shop-about-btn--ig { color: var(--text); background: rgba(255, 40, 81, 0.12); border-color: var(--red-dim); }
+.shop-about-btn--ig:hover, .shop-about-btn--ig:focus-visible { color: #fff; background: rgba(255, 40, 81, 0.22); border-color: var(--red); }
+.shop-about-btn .ig-icon { width: 15px; height: 15px; }
+
 /* Phones: two across, so the products on sale show side by side. Each card keeps
    the photo, name, price, size and add-to-cart; the tagline and chips drop
    out, and the description / size chart stay behind their disclosures. */
@@ -629,4 +719,11 @@ html.shop-modal-open { overflow: hidden; }
   .shop-media .signal-box { padding: 6px; }
   .shop-media .placeholder-label { font-size: 9px; }
   .shop-media .placeholder-sub { display: none; }
+
+  .shop-about { padding: 52px 16px 64px; }
+  .shop-about-grid { grid-template-columns: 1fr; gap: 14px; }
+  .shop-about-card { padding: 20px 18px 18px; gap: 12px; }
+  .shop-about-mark img { width: 36px; height: 36px; }
+  .shop-about-cta { flex-direction: column; }
+  .shop-about-btn { justify-content: center; }
 }
