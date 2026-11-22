@@ -796,6 +796,10 @@ a { color: inherit; }
   flex-wrap: wrap;
   gap: 8px 24px;
 }
+.footer-links a { text-decoration: none; }
+.footer-links a:hover, .footer-links a:focus-visible { color: var(--text); }
+.footer-ig { display: inline-flex; align-items: center; gap: 6px; }
+.ig-icon { width: 14px; height: 14px; flex: none; }
 
 /* ---------- responsive ---------- */
 
